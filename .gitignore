@@ -1,0 +1,8 @@
+
+.settings/*
+*.o
+main
+CImg.h
+*.project
+*.cproject
+*~
