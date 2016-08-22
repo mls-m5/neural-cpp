@@ -80,6 +80,15 @@ public:
 		return *this;
 	}
 
+	GenericValueMap<> &operator=(const GenericValueMap<> & from) {
+		_data = from.data();
+		_width = from._width;
+		_height = from._height;
+		_depth = from._depth;
+		_spectrum = from._spectrum;
+		return *this;
+	}
+
 	int width() const {
 		return _width;
 	}

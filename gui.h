@@ -15,5 +15,6 @@
 void keepOpen();
 void showMap(ValueMap &map, std::string title = "map");
 ValueMap loadValueMap(std::string filename);
+void waitDisplay(int ms);
 
 
