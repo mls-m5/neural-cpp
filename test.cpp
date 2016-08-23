@@ -162,6 +162,16 @@ TEST_CASE("full layer four neuron backpropagation test") {
 	}
 }
 
+TEST_CASE("convolution layer test") {
+	ValueMap inMap(2, 2, 1, {1, 0, 0, 1});
+	ValueMap outMap(2, 1, 1, {1, 2});
+	std::vector<TrainingSet> sets = {{inMap, outMap}};
+
+	Network network(sets);
+
+
+}
+
 
 TEST_SUIT_END
 

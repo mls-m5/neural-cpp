@@ -74,13 +74,16 @@ public:
 class ConvolutionLayer: public Layer {
 public:
 	ValueMap net; //The summed input (z)
-	ValueMap kernel; //The connections
+	ValueMap kernel; //The weight of the connections, shared
+	ValueMap bias; //The bias of the connections, also shared
 
 	ConvolutionLayer(int width, int height, int depth, int kernelSize, int kernelDepth):
 	Layer(width, height, depth),
 	net(width, height, depth),
-	kernel(kernelSize, kernelSize, kernelDepth, depth){
+	kernel(kernelSize, kernelSize, kernelDepth, depth),
+	bias(kernelSize, kernelSize, kernelDepth, depth){
 		kernel.noise(1);
+		bias.noise(1);
 		mn_forX(kernel, x) {
 			cout << "kernel" << kernel(x, 0,0) << endl;
 		}
@@ -99,11 +102,16 @@ public:
 		//Not that the kz does not work in the same convolving way as the others
 		//All layers in the output layer should be connected to all the neuron in
 		//z-axis but not in the other axes
-		mn_forXYZ(kernel, kx, ky, kz) {
-			mn_forXYZ(net, x, y, z) {
-				auto k = kernel(kx, ky, kz, z); //For debugging
-				net(x, y, z) += source->a(x + kx, y +ky, kz) * k;
+		//Also note that  the kernel has four dimensions 3 for the output layer and 1 (c) for the input layer
+		//That is because the kernel is shared for all the neurons in the output layers xy axis (0 dimensions)
+		//but not for the z axis (1 dimension)
+		mn_forXYZ(net, x, y, z) {
+			ValueType n = 0;
+			mn_forXYZ(kernel, kx, ky, kz) {
+				auto w = kernel(kx, ky, kz, z); //Note that the last dimension is the separated z axis
+				n += source->a(x + kx, y +ky, kz) * w + bias(kx, ky, kz, z);
 			}
+			net (x, y, z) = n;
 		}
 
 		mn_forXYZ(a, x, y, z) {
@@ -121,23 +129,24 @@ public:
 		auto &sourceD = source->d;
 		mn_forXYZ(d, x, y, z) {
 			mn_forXYZ(kernel, kx, ky, kz) {
-				//Kontrollera detta, jag är jättetrött när jag skriver det, så det kan mycket väl bli fel
-				sourceD(x + kx, y +ky, kz) += d(x, y, z) * aPrim(x, y, z) * kernel(kx, ky, kz);
+				//Like the forward propagation above but backwards (and the derivative so there si no bias)
+				sourceD(x + kx, y + ky, kz) += d(x, y, z) * aPrim(x, y, z) * kernel(kx, ky, kz, z);
 			}
 		}
 	}
 
 	//Call for hidden and output layers
 	void correctErrors(ValueType learningRate) override {
-//		auto &sourceA = source->a; //I have no idea, check so that it works
-//		mn_forX(bias, x) {
-//			bias(x) -= d(x) * learningRate;
+		auto &sourceA = source->a; //I have no idea, check so that it works
+//		mn_forXYZ(bias, x, y, z) {
+//			bias(x, y, z) -= d(x, y, z) * learningRate;
 //		}
-//		mn_forXYZ(net, x, y, z) {
-//			mn_forXYZ(kernel, kx, ky, kz) {
-//				kernel(kx, ky, kz, ) -= this->d(ox) * sourceA(x, y, z) * learningRate;
-//			}
-//		}
+		mn_forXYZ(d, x, y, z) {
+			mn_forXYZ(kernel, kx, ky, kz) {
+				bias(kx, ky, kz, z) -= this->d(x, y, z);
+				kernel(kx, ky, kz, z) -= this->d(x, y, z) * sourceA(x, y, z) * learningRate;
+			}
+		}
 	}
 
 
@@ -189,8 +198,8 @@ public:
 	void backward() {
 		auto &sourceD = source->d;
 		mn_forXYZ(d, x, y, z) {
-			auto coord = indexedCoords(fromIndex);
-			sourceD(x + coord, y + coord, z) = d(x, y, z);
+			auto coord = indexedCoords[fromIndex(x, y, z)];
+			sourceD(x + coord.x, y + coord.y, z) = d(x, y, z);
 		}
 
 	}

@@ -62,13 +62,22 @@ void keepOpen() {
 	}
 }
 
-ValueMap loadValueMap(std::string filename) {
+ValueMap loadValueMap(std::string filename, size_t nx, size_t ny) {
 	CImg<float> image(filename.c_str());
-	ValueMap map(image.width(), image.height());
-	cimg_forXY(image, x, y) {
-		cimg_forC(image, c) {
-			map(x, y) += image(x, y, 0, c);
+
+	if (nx > 0 || ny > 0) {
+		if (nx <= 0) {
+			nx = image.width();
 		}
+		if (ny <= 0) {
+			ny = image.height();
+		}
+		image.resize(nx, ny);
+	}
+
+	ValueMap map(image.width(), image.height(), image.spectrum());
+	cimg_forXYC(image, x, y, c) {
+		map(x, y, c) = image(x, y, 0, c); //Move the color component to z
 	}
 
 	return map;

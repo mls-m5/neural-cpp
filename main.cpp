@@ -9,37 +9,60 @@
 #include "network.h"
 
 void test1() {
-	ValueMap inputMap(loadValueMap("linus.png"));
+	ValueMap inputMap(loadValueMap("linus.png", 100, 100));
 	inputMap.normalze();
 
-	InputLayer input(inputMap);
+	ValueMap outputMap(2, 1, 1, {1, 0}); //A cat an not a dog
+	TrainingSet set(inputMap, outputMap);
 
 
-	ConvolutionLayer layer1(input, 2, 5);
+//	InputLayer input(inputMap);
+	Network network({set});
+
+
+
+	auto layer1 = new ConvolutionLayer(network.back(), 2, 5);
+	network.pushLayer(layer1);
 //	mn_forXYZC(layer1.kernel, x, y, z, c) {
 //		layer1.kernel(x, y, z, c) = rnd() + c;
 //	}
-	layer1.forward();
-	MaxPool pool(layer1);
-	pool.forward();
-	ConvolutionLayer layer2(pool, 2, 5);
-	layer2.forward();
-	MaxPool pool2(layer2);
-	pool2.forward();
-	MaxPool pool3(pool2);
-	pool3.forward();
-	FullLayer std1(pool3, 10);
-	std1.forward();
+//	layer1.forward();
+	auto pool = new MaxPool(*layer1);
+//	pool.forward();
+	network.pushLayer(pool);
+	auto layer2 = new ConvolutionLayer(*pool, 2, 5);
+	network.pushLayer(layer2);
+//	layer2.forward();
+	auto pool2 = new MaxPool(*layer2);
+	network.pushLayer(pool2);
+//	pool2.forward();
+	auto pool3 = new MaxPool(*pool2);
+	network.pushLayer(pool3);
+//	pool3.forward();
+	auto std1 = new FullLayer(*pool3, 10);
+	network.pushLayer(std1);
+//	std1.forward();
+	auto full2 = new FullLayer(*std1, 2);
+	network.pushLayer(full2);
+//	full2.forward();
 
 
+//	network.forwardPropagate();
+	for (int i = 0; i < 100; ++i) {
+		network.backPropagationCycle();
+
+		cout << "Totalt fel: " << network.getTotalCost() << endl;
+	}
 
 	showMap(inputMap);
-	showMap(layer1.net, "layer 1");
-	showMap(layer1.kernel, "layer 1 - kernel");
-	showMap(pool.a, "pool 1");
-	showMap(layer2.net, "layer 2");
-	showMap(pool2.a, "pool 2");
-	showMap(std1.a);
+	showMap(layer1->net, "layer 1");
+	showMap(layer1->kernel, "layer 1 - kernel");
+	showMap(pool->a, "pool 1");
+	showMap(layer2->net, "layer 2");
+	showMap(layer2->kernel, "layer 2 - kernel");
+	showMap(pool2->a, "pool 2");
+	showMap(std1->a);
+	showMap(full2->a, "output");
 	keepOpen();
 
 }
@@ -93,8 +116,8 @@ void test2() {
 int main(int, char **) {
 	cout << "startar neuronnät" << endl;
 
-//	test1();
-	test2();
+	test1();
+//	test2();
 
 
 	std::exit(0);

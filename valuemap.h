@@ -64,11 +64,22 @@ public:
 		_data(w * h * d * c){
 	}
 
+	GenericValueMap(int w, int h, int d, std::vector<ValueType> data):
+		_width(w),
+		_height(h),
+		_depth(d),
+		_spectrum(1),
+		_data(data){
+
+	}
+
 	void setData(T *data) {
 		mn_for1(_data.size(), i) {
 			_data[i] = data[i];
 		}
 	}
+
+	GenericValueMap(const GenericValueMap&) = default;
 
 	template <class fromT>
 	GenericValueMap<ValueType> &operator=(fromT &from) {

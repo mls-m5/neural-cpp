@@ -41,6 +41,10 @@ public:
 		output = set.output;
 	}
 	TrainingSet() = default;
+
+	TrainingSet(const ValueMap &in, const ValueMap &out):
+	input(in), output(out){
+	}
 	ValueMap input;
 	ValueMap output;
 };
