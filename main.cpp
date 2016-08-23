@@ -10,45 +10,39 @@
 
 void test1() {
 	ValueMap inputMap(loadValueMap("linus.png", 100, 100));
+	ValueMap falseInputMap(loadValueMap("house.png", 100, 100));
+
 	inputMap.normalze();
 
-	ValueMap outputMap(2, 1, 1, {1, 0}); //A cat an not a dog
-	TrainingSet set(inputMap, outputMap);
+	ValueMap catOutputMap(2, 1, 1, {1, 0}); //A cat
+	TrainingSet set1(inputMap, catOutputMap);
+
+	ValueMap falseOutput(2, 1, 1, {0, 1}); //A house is not a cat
+	TrainingSet set2(falseInputMap, falseOutput);
 
 
 //	InputLayer input(inputMap);
-	Network network({set});
+	Network network({set1, set2});
 
 
 
-	auto layer1 = new ConvolutionLayer(network.back(), 2, 5);
+	auto layer1 = new ConvolutionLayer(network.back(), 5, 5);
 	network.pushLayer(layer1);
-//	mn_forXYZC(layer1.kernel, x, y, z, c) {
-//		layer1.kernel(x, y, z, c) = rnd() + c;
-//	}
-//	layer1.forward();
 	auto pool = new MaxPool(*layer1);
-//	pool.forward();
 	network.pushLayer(pool);
-	auto layer2 = new ConvolutionLayer(*pool, 2, 5);
+	auto layer2 = new ConvolutionLayer(*pool, 5, 5);
 	network.pushLayer(layer2);
-//	layer2.forward();
 	auto pool2 = new MaxPool(*layer2);
 	network.pushLayer(pool2);
-//	pool2.forward();
 	auto pool3 = new MaxPool(*pool2);
 	network.pushLayer(pool3);
-//	pool3.forward();
 	auto std1 = new FullLayer(*pool3, 10);
 	network.pushLayer(std1);
-//	std1.forward();
 	auto full2 = new FullLayer(*std1, 2);
 	network.pushLayer(full2);
-//	full2.forward();
 
 
-//	network.forwardPropagate();
-	for (int i = 0; i < 100; ++i) {
+	for (int i = 0; i < 5000; ++i) {
 		network.backPropagationCycle();
 
 		cout << "Totalt fel: " << network.getTotalCost() << endl;
