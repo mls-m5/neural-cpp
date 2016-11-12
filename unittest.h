@@ -12,6 +12,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <exception>
 
 typedef void (*testFunction)();
 
@@ -32,6 +33,10 @@ inline int runTests(){
 		test_result = 0;
 		try {
 			it.second();
+		}
+		catch (std::exception &e) {
+			std::cerr << "error: " << e.what() << endl;
+			test_result = -2;
 		}
 		catch (...) {
 			std::cerr << "error" << endl;

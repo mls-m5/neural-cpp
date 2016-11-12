@@ -41,10 +41,10 @@ void test1() {
 	auto full2 = new FullLayer(*std1, 2);
 	network.pushLayer(full2);
 
-
-	for (int i = 0; i < 5000; ++i) {
+	size_t targetGeneration = 5000;
+	for (size_t i = 0; i < targetGeneration; ++i) {
 		network.backPropagationCycle();
-
+		cout << "generation: " << i << "/" << targetGeneration << endl;
 		cout << "Totalt fel: " << network.getTotalCost() << endl;
 	}
 
@@ -58,7 +58,6 @@ void test1() {
 	showMap(std1->a);
 	showMap(full2->a, "output");
 	keepOpen();
-
 }
 
 void test2() {
@@ -104,6 +103,19 @@ void test2() {
 
 
 	keepOpen();
+}
+
+void test3() { //Do a image filter and try to learn it
+//	ValueMap inputMap(loadValueMap("linus.png", 100, 100));
+//
+//	InputLayer inputLayer(inputMap);
+//	ConvolutionLayer targetConvolution(inputLayer, 1, 3);
+//	targetConvolution.kernel.setData(std::vector<ValueType>({
+//		0, -1, 0,
+//		-1, 4, -1,
+//		0, -1, 0
+//	})); //Continue here...
+
 }
 
 

@@ -9,7 +9,9 @@
 
 #include "valuemap.h"
 #include "layer.h"
+#include "common.h"
 
+#include <exception>
 
 //Algorithm vanlig backpropagation
 //1: Set input
@@ -106,6 +108,10 @@ public:
 	ValueType getTotalCost() {
 		auto &outputAData = back().a;
 		auto &outputTraining = getCurrentTrainingSet().output;
+		if (!outputAData.isDimensionsSame(outputTraining)) {
+			throw std::range_error(std::string(__FILE__) + ":" + i2str(__LINE__) + ": " + __func__ + "(): training data " + outputTraining.toString() +
+					" does not match network layer " + outputAData.toString() + " dimensions");
+		}
 		ValueType sum = 0;
 		mn_forXYZ(outputAData, x, y, z) {
 			auto diff = outputAData(x, y, z) - outputTraining(x, y, z);
@@ -131,7 +137,7 @@ public:
 		outputLayer.d *= outputLayer.aPrim;
 
 		for (auto rit = layers.rbegin(); rit != layers.rend(); ++rit) {
-			//It does not have any affect on input layers but do it anyway for convenience
+			//It does not have any effect on input layers but do it anyway for convenience
 			(*rit)->backward();
 		}
 	}

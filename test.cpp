@@ -114,7 +114,7 @@ TEST_CASE("full layer simple backpropagation test") {
 }
 
 
-TEST_CASE("full layer four neuron backpropagation test") {
+TEST_CASE("full layer four neuron bp test") {
 	{
 		std::vector<std::vector<std::vector<ValueType>>> data = {
 				{{0, 0}, {0, 1}}, //Count
@@ -164,12 +164,34 @@ TEST_CASE("full layer four neuron backpropagation test") {
 
 TEST_CASE("convolution layer test") {
 	ValueMap inMap(2, 2, 1, {1, 0, 0, 1});
-	ValueMap outMap(2, 1, 1, {1, 2});
+	ValueMap outMap(1, 1, 1, std::vector<float>({.5}));
 	std::vector<TrainingSet> sets = {{inMap, outMap}};
 
 	Network network(sets);
 
+	auto layer = new ConvolutionLayer(network.back(), 1, 2);
+	network.pushLayer(layer);
 
+	network.backPropagationCycle();
+	auto error = network.getTotalCost();
+
+//	cout << "error in the beginning: " << error << endl;
+
+	for (int i = 0; i < 1000; ++i) {
+		network.backPropagationCycle();
+	}
+
+
+	auto afterError = network.getTotalCost();
+//	cout << "error after: " << afterError << endl;
+
+//	cout << "the final kernel:" << endl;
+//	for (auto v: layer->kernel.data()) {
+//		cout << v << endl;
+//	}
+//	cout << "--end of kernel" << endl;
+
+	ASSERT_LT(afterError, error);
 }
 
 

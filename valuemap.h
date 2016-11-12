@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "common.h"
 #include <functional>
 #include <vector>
 #include <memory>
@@ -174,6 +175,16 @@ public:
 		return *this;
 	}
 
+	//Check if dimensions is the same
+	bool isDimensionsSame(ValueMap &other) {
+		if (other.width() != width() || other.height() != height() || other.depth() != depth() || other.spectrum() != spectrum()) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
 	T& operator()(const unsigned int x) {
 		return _data[x];
 	}
@@ -214,6 +225,14 @@ public:
 		return _data[x + y*(size_t)_width + z*(size_t)_width*_height + c*(size_t)_width*_height*_depth];
 	}
 
+	std::string toString() {
+		return "<ValueMap (" + i2str(width()) + ", " + i2str(height()) + ", " + i2str(depth()) + ", " + i2str(spectrum()) + ")>";
+	}
+
+	operator std::string() {
+		return toString();
+	}
+
 #define mn_unary_operator_definition(op) \
 	ValueMap &operator op (ValueMap &map) { \
 		for (size_t i = 0; i < _data.size(); ++i) { \
@@ -241,7 +260,28 @@ public:
 	int _height;
 	int _depth;
 	int _spectrum; //Naming forth dimension
-	std::vector<T> _data;
+
+	//For debugging
+	class BoundCheckingVector: public std::vector<T> {
+	public:
+		template<class V>
+		BoundCheckingVector(V data): std::vector<T>(data) {}
+		using std::vector<T>::vector;
+		using std::vector<T>::operator=;
+		BoundCheckingVector() = default;
+
+		T& operator[](size_t index) {
+			if (index > size()) {
+				throw "index out of range";
+			}
+			return this->std::vector<T>::operator [](index);
+		}
+	};
+
+	typedef BoundCheckingVector VectorType;
+//	typedef std::vector<T> VectorType;
+
+	VectorType _data;
 };
 
 

@@ -84,16 +84,16 @@ public:
 	bias(kernelSize, kernelSize, kernelDepth, depth){
 		kernel.noise(1);
 		bias.noise(1);
-		mn_forX(kernel, x) {
-			cout << "kernel" << kernel(x, 0,0) << endl;
-		}
+//		mn_forX(kernel, x) {
+//			cout << "kernel " << kernel(x, 0,0) << endl;
+//		}
 	}
 
 	ConvolutionLayer(const ConvolutionLayer&) = delete;
 
 	ConvolutionLayer(Layer &input, int depth, int kernelSize):
-	ConvolutionLayer(input.a.width() - (kernelSize - 1) / 2,
-	input.a.height() - (kernelSize - 1) / 2, depth, kernelSize, input.a.depth()){
+	ConvolutionLayer(input.a.width() - kernelSize + 1,
+	input.a.height() - kernelSize + 1, depth, kernelSize, input.a.depth()){
 		setSource(input);
 	}
 
@@ -109,14 +109,14 @@ public:
 			ValueType n = 0;
 			mn_forXYZ(kernel, kx, ky, kz) {
 				auto w = kernel(kx, ky, kz, z); //Note that the last dimension is the separated z axis
-				n += source->a(x + kx, y +ky, kz) * w + bias(kx, ky, kz, z);
+				n += source->a(x + kx, y + ky, kz) * w + bias(kx, ky, kz, z);
 			}
 			net (x, y, z) = n;
 		}
 
 		mn_forXYZ(a, x, y, z) {
 			auto n = net(x, y, z);
-			a(x, y, z) = activationFunction(n); // Add activation function here
+			a(x, y, z) = activationFunction(n); // Add activation function
 			aPrim(x, y, z) = activationDerivate(n); //Calculate derivative, this can be optimized
 		}
 	}
