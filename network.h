@@ -9,11 +9,10 @@
 
 #include "valuemap.h"
 #include "layer.h"
-#include "common.h"
 
 #include <exception>
 
-//Algorithm vanlig backpropagation
+//Algorithm common backpropagation
 //1: Set input
 //2: frammåtmatning
 //3: Output error
@@ -102,7 +101,6 @@ public:
 		for (auto it = layers.begin() + 1; it != layers.end(); ++it) {
 			(*it)->forward();
 		}
-
 	}
 
 	ValueType getTotalCost() {

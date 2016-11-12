@@ -31,6 +31,7 @@ inline int runTests(){
 	for (auto it: testMap){
 		cout << "--- running test " << it.first << " ---" << endl;
 		test_result = 0;
+#ifndef MATUNIT_DISABLE_ERROR_HANDLING
 		try {
 			it.second();
 		}
@@ -42,6 +43,9 @@ inline int runTests(){
 			std::cerr << "error" << endl;
 			test_result = -2;
 		}
+#else
+		it.second();
+#endif
 		if (test_result == -1) {
 			cout << " --> not impl" << endl << endl;
 			test_results[it.first] = "not implemented";

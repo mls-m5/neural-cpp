@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "common.h"
 #include <functional>
 #include <vector>
 #include <memory>
@@ -231,6 +230,15 @@ public:
 
 	operator std::string() {
 		return toString();
+	}
+
+	void printXY() {
+		mn_forY(*this,y) {
+			mn_forX(*this,x) {
+				std::cout << this->operator() (x, y) << "\t";
+			}
+			std::cout << std::endl;
+		}
 	}
 
 #define mn_unary_operator_definition(op) \

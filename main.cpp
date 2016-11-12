@@ -25,12 +25,13 @@ void test1() {
 	Network network({set1, set2});
 
 
-
 	auto layer1 = new ConvolutionLayer(network.back(), 5, 5);
+	layer1->name = "conv layer 1";
 	network.pushLayer(layer1);
 	auto pool = new MaxPool(*layer1);
 	network.pushLayer(pool);
 	auto layer2 = new ConvolutionLayer(*pool, 5, 5);
+	layer2->name = "conv layer 2";
 	network.pushLayer(layer2);
 	auto pool2 = new MaxPool(*layer2);
 	network.pushLayer(pool2);
@@ -41,7 +42,7 @@ void test1() {
 	auto full2 = new FullLayer(*std1, 2);
 	network.pushLayer(full2);
 
-	size_t targetGeneration = 5000;
+	size_t targetGeneration = 20;
 	for (size_t i = 0; i < targetGeneration; ++i) {
 		network.backPropagationCycle();
 		cout << "generation: " << i << "/" << targetGeneration << endl;

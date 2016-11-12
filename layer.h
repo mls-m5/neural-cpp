@@ -24,6 +24,8 @@ public:
 	ValueMap aPrim;
 	ValueMap d;
 
+	std::string name; //Used to identify the layer
+
 	Layer(int width, int height, int depth = 1):
 	a(width, height, depth),
 	aPrim(width, height, depth),
@@ -59,7 +61,7 @@ public:
 class InputLayer: public Layer {
 public:
 	InputLayer(ValueMap &activations):
-	Layer(activations.width(), activations.height())
+	Layer(activations.width(), activations.height(), activations.depth())
 	{
 		a = activations;
 	}
@@ -129,7 +131,7 @@ public:
 		auto &sourceD = source->d;
 		mn_forXYZ(d, x, y, z) {
 			mn_forXYZ(kernel, kx, ky, kz) {
-				//Like the forward propagation above but backwards (and the derivative so there si no bias)
+				//Like the forward propagation above but backwards (and the derivative so there is no bias)
 				sourceD(x + kx, y + ky, kz) += d(x, y, z) * aPrim(x, y, z) * kernel(kx, ky, kz, z);
 			}
 		}
@@ -141,12 +143,25 @@ public:
 //		mn_forXYZ(bias, x, y, z) {
 //			bias(x, y, z) -= d(x, y, z) * learningRate;
 //		}
+
+		double scale = 1. / kernel.data().size();
 		mn_forXYZ(d, x, y, z) {
 			mn_forXYZ(kernel, kx, ky, kz) {
-				bias(kx, ky, kz, z) -= this->d(x, y, z);
-				kernel(kx, ky, kz, z) -= this->d(x, y, z) * sourceA(x, y, z) * learningRate;
+				bias(kx, ky, kz, z) -= d(x, y, z) * learningRate * scale;
+				kernel(kx, ky, kz, z) -= d(x, y, z) * sourceA(x, y, kz) * learningRate * scale;
 			}
 		}
+
+		//Prototype from fully connected layer
+//		auto &sourceA = source->a;
+//		mn_forX(bias, x) {
+//			bias(x) -= d(x) * learningRate;
+//		}
+//		mn_forX(net, ox) {
+//			mn_forXYZ(kernel, x, y, z) {
+//				kernel(x, y, z, ox) -= this->d(ox) * sourceA(x, y, z) * learningRate;
+//			}
+//		}
 	}
 
 
