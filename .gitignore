@@ -2,7 +2,10 @@ test
 .settings/*
 *.o
 main
+training
 CImg.h
 *.project
 *.cproject
 *~
+
+output/

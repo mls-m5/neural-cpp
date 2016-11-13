@@ -37,7 +37,7 @@ void showMap(ValueMap &map, std::string title) {
 
 	std::stringstream ss;
 
-	ss << title << " " << map.width() << "x" << map.height() << "x" << map.depth() << "x" << map.spectrum();
+//	ss << title << " " << map.width() << "x" << map.height() << "x" << map.depth() << "x" << map.spectrum();
 
 	if (image.width() < 100) {
 		image.resize(100,100);
@@ -53,6 +53,7 @@ void showMap(ValueMap &map, std::string title) {
 
 	auto disp = new CImgDisplay(image, ss.str().c_str());
 	displays.push_back({disp, &map});
+	disp->set_title(title.c_str());
 }
 
 void keepOpen() {
@@ -60,27 +61,6 @@ void keepOpen() {
 	while (!disp.is_closed() && !disp.is_keyQ() && !disp.is_keyESC()) {
 		disp.wait_all();
 	}
-}
-
-ValueMap loadValueMap(std::string filename, size_t nx, size_t ny) {
-	CImg<float> image(filename.c_str());
-
-	if (nx > 0 || ny > 0) {
-		if (nx <= 0) {
-			nx = image.width();
-		}
-		if (ny <= 0) {
-			ny = image.height();
-		}
-		image.resize(nx, ny);
-	}
-
-	ValueMap map(image.width(), image.height(), image.spectrum());
-	cimg_forXYC(image, x, y, c) {
-		map(x, y, c) = image(x, y, 0, c); //Move the color component to z
-	}
-
-	return map;
 }
 
 

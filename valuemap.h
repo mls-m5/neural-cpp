@@ -70,7 +70,6 @@ public:
 		_depth(d),
 		_spectrum(1),
 		_data(data){
-
 	}
 
 	void setData(T *data) {
@@ -82,7 +81,7 @@ public:
 	GenericValueMap(const GenericValueMap&) = default;
 
 	template <class fromT>
-	GenericValueMap<ValueType> &operator=(fromT &from) {
+	auto &operator=(fromT &from) {
 		_data = from.data();
 		_width = from._width;
 		_height = from._height;
@@ -91,7 +90,7 @@ public:
 		return *this;
 	}
 
-	GenericValueMap<> &operator=(const GenericValueMap<> & from) {
+	auto &operator=(const GenericValueMap<> & from) {
 		_data = from.data();
 		_width = from._width;
 		_height = from._height;
@@ -100,31 +99,31 @@ public:
 		return *this;
 	}
 
-	int width() const {
+	auto width() const {
 		return _width;
 	}
 
-	int height() const {
+	auto height() const {
 		return _height;
 	}
 
-	int depth() const {
+	auto depth() const {
 		return _depth;
 	}
 
-	int spectrum() const {
+	auto spectrum() const {
 		return _spectrum;
 	}
 
-	int size() const {
+	auto size() const {
 		return _data.size();
 	}
 
-	const std::vector<T> &data() const {
+	auto &data() const {
 		return _data;
 	}
 
-	std::vector<T> &data() {
+	auto &data() {
 		return _data;
 	}
 
@@ -141,8 +140,8 @@ public:
 		}
 	}
 
-	ValueType max() {
-		auto m = -1000;
+	auto max() {
+		ValueType m = -1000;
 		for (auto it: _data) {
 			if (it > m) {
 				m = it;
@@ -152,8 +151,8 @@ public:
 	}
 
 
-	ValueType min() {
-		auto m = 1000;
+	auto min() {
+		ValueType m = 1000;
 		for (auto it: _data) {
 			if (it < m) {
 				m = it;
@@ -294,3 +293,8 @@ public:
 
 
 typedef GenericValueMap<> ValueMap;
+
+ValueMap loadValueMapImg(std::string filename, int newWidth = 0, int newHeight = 0);
+void saveValueMapImg(ValueMap &map, std::string filename);
+
+

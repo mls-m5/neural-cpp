@@ -82,6 +82,17 @@ public:
 	void pushLayer(Layer *layer) {
 		layers.push_back(layer);
 	}
+	
+	//Add a whole chain of layers by only adding the last layer in the chain
+	void setChain(Layer *layer) {
+		auto beginningSize = layers.size();
+		for (auto l = layer; l->source != nullptr; l = l->source) {
+			layers.insert(layers.begin() + beginningSize, l);
+		}
+		if (beginningSize > 0) {
+			layers[beginningSize]->source = layers[beginningSize - 1];
+		}
+	}
 
 	void backPropagationCycle() {
 		forwardPropagate();

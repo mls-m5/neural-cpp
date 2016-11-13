@@ -9,8 +9,8 @@
 #include "network.h"
 
 void test1() {
-	ValueMap inputMap(loadValueMap("linus.png", 100, 100));
-	ValueMap falseInputMap(loadValueMap("house.png", 100, 100));
+	ValueMap inputMap(loadValueMapImg("linus.png", 100, 100));
+	ValueMap falseInputMap(loadValueMapImg("house.png", 100, 100));
 
 	inputMap.normalze();
 
@@ -99,25 +99,9 @@ void test2() {
 	showMap(network.layers[0]->a);
 	showMap(outLayer->a, "output");
 	showMap(outLayer->kernel, "out kernel");
-
-//	waitDisplay(100);
-
-
 	keepOpen();
 }
 
-void test3() { //Do a image filter and try to learn it
-//	ValueMap inputMap(loadValueMap("linus.png", 100, 100));
-//
-//	InputLayer inputLayer(inputMap);
-//	ConvolutionLayer targetConvolution(inputLayer, 1, 3);
-//	targetConvolution.kernel.setData(std::vector<ValueType>({
-//		0, -1, 0,
-//		-1, 4, -1,
-//		0, -1, 0
-//	})); //Continue here...
-
-}
 
 
 int main(int, char **) {
