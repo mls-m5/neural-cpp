@@ -94,10 +94,29 @@ public:
 		}
 	}
 
+	void save(std::ostream &stream) {
+		for (auto &l: layers) {
+			stream << *l;
+		}
+	}
+
+	void load(std::istream &stream) {
+		auto previous = layers.front();
+		while (auto l = Layer::load(stream, *previous)) {
+			layers.push_back(l);
+		}
+	}
+
 	void backPropagationCycle() {
 		forwardPropagate();
 		backPropagateError();
 		correctErrors();
+	}
+
+	void dreamCycle() {
+		forwardPropagate();
+		backPropagateError();
+		correctInputLayer();
 	}
 
 	TrainingSet &getCurrentTrainingSet() {
@@ -146,14 +165,41 @@ public:
 		outputLayer.d *= outputLayer.aPrim;
 
 		for (auto rit = layers.rbegin(); rit != layers.rend(); ++rit) {
-			//It does not have any effect on input layers but do it anyway for convenience
+			//Effect on input layer is only used when dreaming
 			(*rit)->backward();
 		}
 	}
 
+	//The last step in the back propagation cycle
 	void correctErrors() {
-		for (auto &layer: layers) {
-			layer->correctErrors(learningRate);
+		if (layers.empty()) {
+			return;
+		}
+		for (auto it=layers.begin() + 1; it!= layers.end(); ++it){
+//		for (auto &layer: layers) {
+			(*it)->correctErrors(learningRate);
 		}
 	}
+
+	//Used for dreaming
+	//Correct the error on the input layer without changing anything else
+	void correctInputLayer() {
+
+	}
 };
+
+
+inline std::ostream &operator<<(std::ostream &stream, Network &network) {
+	network.save(stream);
+
+	return stream;
+}
+
+
+inline std::istream &operator>>(std::istream &stream, Network &network) {
+	network.load(stream);
+
+	return stream;
+}
+
+

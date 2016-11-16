@@ -24,12 +24,21 @@ public:
 	ValueMap aPrim;
 	ValueMap d;
 
-	std::string name; //Used to identify the layer
+	std::string name = ""; //Used to identify the layer
+	std::string type = "none"; //Name that is used for saving
 
 	Layer(int width, int height, int depth = 1):
 	a(width, height, depth),
 	aPrim(width, height, depth),
 	d(width, height, depth){
+	}
+
+	Layer() = default;
+
+	void resize(int width, int height = 1, int depth = 1, int spectrum = 1) {
+		a.resize(width, height, depth, spectrum);
+		aPrim.resize(width, height, depth, spectrum);
+		d.resize(width, height, depth, spectrum);
 	}
 
 	virtual ~Layer() {
@@ -43,6 +52,14 @@ public:
 	virtual void forward() = 0;
 	virtual void prepareBackward() = 0;
 	virtual void backward() = 0;
+	virtual void saveHeader(std::ostream &stream) {
+		stream << type << " '" << name << "'" << std::endl;
+	}
+	virtual void save(std::ostream &stream) {
+		saveHeader(stream);
+	}
+
+	static Layer* load(std::istream& stream, Layer &from);
 
 	//Call for hidden and output layers
 	virtual void correctErrors(ValueType learningRate) = 0;
@@ -58,11 +75,20 @@ public:
 
 };
 
+
+inline std::ostream &operator<<(std::ostream &stream, Layer &layer) {
+	layer.save(stream);
+
+	return stream;
+}
+
+
 class InputLayer: public Layer {
 public:
 	InputLayer(ValueMap &activations):
 	Layer(activations.width(), activations.height(), activations.depth())
 	{
+		type = "input";
 		a = activations;
 	}
 
@@ -84,19 +110,31 @@ public:
 	net(width, height, depth),
 	kernel(kernelSize, kernelSize, kernelDepth, depth),
 	bias(kernelSize, kernelSize, kernelDepth, depth){
+		type = "conv";
 		kernel.noise(1);
 		bias.noise(1);
-//		mn_forX(kernel, x) {
-//			cout << "kernel " << kernel(x, 0,0) << endl;
-//		}
 	}
 
 	ConvolutionLayer(const ConvolutionLayer&) = delete;
+
+	ConvolutionLayer(std::istream &stream, Layer &input):
+		kernel(stream),
+		bias(stream) {
+		type = "conv";
+		auto &ia = input.a;
+		resize(ia.width(), ia.height(), ia.depth());
+	}
 
 	ConvolutionLayer(Layer &input, int depth, int kernelSize):
 	ConvolutionLayer(input.a.width() - kernelSize + 1,
 	input.a.height() - kernelSize + 1, depth, kernelSize, input.a.depth()){
 		setSource(input);
+	}
+
+	void save(std::ostream &stream) override {
+		saveHeader(stream);
+		kernel.save(stream);
+		bias.save(stream);
 	}
 
 	void forward() override {
@@ -176,12 +214,18 @@ public:
 	MaxPool(int width, int height, int depth):
 		Layer(width, height, depth),
 		fromIndex(width, height, depth){
+		type = "maxpool";
 	}
 
 	//Disable standard copy constructor
 	MaxPool(const MaxPool &) = delete;
 	MaxPool(MaxPool & input):
 		MaxPool((Layer&) input) {}
+
+	MaxPool(std::istream &) {
+		type = "maxpool";
+		//
+	}
 
 	//Simpler initialization
 	MaxPool(Layer& input):
@@ -248,12 +292,14 @@ public:
 
 class FullLayer: public Layer {
 public:
+	int number = 1;
 	ValueMap kernel; //w for the connections
 	ValueMap bias;
 	ValueMap net;
 
 	FullLayer(Layer &layer, int number):
 	Layer(number, 1, 1),
+	number(number),
 	kernel(layer.a.width(), layer.a.height(), layer.a.depth(), number),
 	bias(number, 1),
 	net(number, 1){
@@ -262,6 +308,23 @@ public:
 		//Create random weights
 		kernel.noise(1); //Add uniform noise
 		kernel.noise(1);
+
+		type = "full";
+	}
+
+	FullLayer(std::istream &stream, Layer &layer)
+	{
+		stream >> number;
+		resize(layer.a.width(), layer.a.height(), layer.a.depth(), number);
+		kernel.load(stream);
+		bias.load(stream);
+	}
+
+	void save(std::ostream &stream) override {
+		saveHeader(stream);
+		stream << number << endl;
+		kernel.save(stream);
+		bias.save(stream);
 	}
 
 	void forward() override {
@@ -306,3 +369,20 @@ public:
 	}
 };
 
+inline Layer* Layer::load(std::istream& stream, Layer &from) {
+	std::string type, name;
+	stream >> type >> name;
+	
+	if (type == "conv") {
+		return new ConvolutionLayer(stream, from);
+	}
+	if (type == "maxpool") {
+		return new MaxPool(from); //Note the max-pool does not load any data
+	}
+	if (type == "full") {
+		return new FullLayer(stream, from);
+	}
+	else {
+		return nullptr;
+	}
+}

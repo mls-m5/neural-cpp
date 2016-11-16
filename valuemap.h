@@ -78,6 +78,10 @@ public:
 		}
 	}
 
+	GenericValueMap(std::istream &stream) {
+		load(stream);
+	}
+
 	GenericValueMap(const GenericValueMap&) = default;
 
 	template <class fromT>
@@ -97,6 +101,14 @@ public:
 		_depth = from._depth;
 		_spectrum = from._spectrum;
 		return *this;
+	}
+
+	void resize(int w, int h, int d, int s) {
+		_width = w;
+		_height = h;
+		_depth = d;
+		_spectrum = s;
+		_data.resize(w * h * d * s);
 	}
 
 	auto width() const {
@@ -125,6 +137,14 @@ public:
 
 	auto &data() {
 		return _data;
+	}
+
+	auto begin() {
+		return _data.begin();
+	}
+
+	auto end() {
+		return _data.end();
 	}
 
 	//Create noise around zero
@@ -231,6 +251,44 @@ public:
 		return toString();
 	}
 
+	void load(std::istream &stream) {
+		int w, h, d, s;
+		stream >> w;
+		stream >> h;
+		stream >> d;
+		stream >> s;
+		resize(w, h, d, s);
+		for (auto &it: *this) {
+			stream >> it;
+		}
+	}
+
+	void save(std::ostream &stream) {
+		stream << width() << " ";
+		stream << height() << " ";
+		stream << depth() << " ";
+		stream << spectrum() << std::endl;
+		stream.precision(15); //Make sure it gets the double decimals
+		for (auto it: *this) {
+			stream << it << " ";
+		}
+		stream << std::endl;
+	}
+
+	bool operator==(ValueMap &map) {
+		if (map.data().size() != size()) {
+			return false;
+		}
+		else {
+			mn_for1(size(), i) {
+				if (map[i] != _data[i]) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	void printXY() {
 		mn_forY(*this,y) {
 			mn_forX(*this,x) {
@@ -293,6 +351,14 @@ public:
 
 
 typedef GenericValueMap<> ValueMap;
+
+
+inline std::ostream &operator<<(std::ostream &stream, ValueMap &map) {
+	map.save(stream);
+
+	return stream;
+}
+
 
 ValueMap loadValueMapImg(std::string filename, int newWidth = 0, int newHeight = 0);
 void saveValueMapImg(ValueMap &map, std::string filename);

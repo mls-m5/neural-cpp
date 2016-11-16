@@ -11,6 +11,7 @@
 #include "network.h"
 
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
@@ -112,6 +113,41 @@ TEST_CASE("full layer simple backpropagation test") {
 		auto costAfter = network.getTotalCost();
 		ASSERT_LT(costAfter, costBefore);
 	}
+}
+
+TEST_CASE("save test") {
+	stringstream ss;
+
+	ValueMap inputMap(4, 4, 1, 3);
+	InputLayer input(inputMap);
+	ConvolutionLayer c(input, 2, 3);
+	FullLayer f(c, 5);
+
+	c.kernel.noise(1);
+	c.bias.noise(1);
+
+	f.bias.noise(1);
+	f.kernel.noise(1);
+
+	ss << c;
+	ss << f;
+//	cout << ss.str() << endl;
+
+	std::unique_ptr<Layer> c2ptr(Layer::load(ss, input));
+	auto c2 = dynamic_cast<ConvolutionLayer*> (c2ptr.get());
+
+	ASSERT(c2, "no layer or wrong type");
+	ASSERT_EQ(c.kernel, c2->kernel);
+	ASSERT_EQ(c.bias, c2->bias);
+
+
+	std::unique_ptr<Layer> f2ptr(Layer::load(ss, *c2));
+	auto f2 = dynamic_cast<FullLayer*> (f2ptr.get());
+
+
+	ASSERT(f2, "no layer or wrong type");
+	ASSERT_EQ(f.kernel, f2->kernel);
+	ASSERT_EQ(f.bias, f2->bias);
 }
 
 

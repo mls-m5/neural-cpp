@@ -98,6 +98,11 @@ int main() {
 //			saveValueMap(full2->a, "output/output.png");
 			network.trainingSets[network.currentTrainingSet].output.printXY();
 			full2->a.printXY();
+
+//			full2->save(cout);
+
+			ofstream file("snapshot.txt");
+			file << network;
 		}
 	}
 
