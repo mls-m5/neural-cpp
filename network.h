@@ -108,12 +108,15 @@ public:
 	}
 
 	void backPropagationCycle() {
+		rotateTrainingsets();
+		layers.front()->a = getCurrentTrainingSet().input;
 		forwardPropagate();
 		backPropagateError();
 		correctErrors();
 	}
 
 	void dreamCycle() {
+		inputLayer().aPrim.fill(1);
 		forwardPropagate();
 		backPropagateError();
 		correctInputLayer();
@@ -124,8 +127,6 @@ public:
 	}
 
 	void forwardPropagate() {
-		//set input...
-		layers.front()->a = getCurrentTrainingSet().input;
 
 		//Forward propagate
 		for (auto it = layers.begin() + 1; it != layers.end(); ++it) {
@@ -148,10 +149,13 @@ public:
 		return sum;
 	}
 
-	void backPropagateError() {
+	void rotateTrainingsets() {
 		if (++currentTrainingSet >= trainingSets.size()) {
 			currentTrainingSet = 0;
 		}
+	}
+
+	void backPropagateError() {
 
 		//Reset and prepare calculations
 		for (auto &layer: layers) {
@@ -176,7 +180,6 @@ public:
 			return;
 		}
 		for (auto it=layers.begin() + 1; it!= layers.end(); ++it){
-//		for (auto &layer: layers) {
 			(*it)->correctErrors(learningRate);
 		}
 	}
@@ -184,7 +187,10 @@ public:
 	//Used for dreaming
 	//Correct the error on the input layer without changing anything else
 	void correctInputLayer() {
-
+		if (layers.empty()) {
+			return;
+		}
+		layers.front()->correctErrors(learningRate);
 	}
 };
 

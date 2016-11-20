@@ -54,8 +54,9 @@ TEST_CASE("full layer simple backpropagation test") {
 		}
 
 		Network network(sets);
-		auto outLayer = new FullLayer(network.back(), 1);
-		network.pushLayer(outLayer);
+		auto hiddenLayer = new FullLayer(network.back(), 3);
+		auto outLayer = new FullLayer(*hiddenLayer, 1);
+		network.setChain(outLayer);
 
 		network.forwardPropagate();
 		auto costBefore = network.getTotalCost();
@@ -64,14 +65,16 @@ TEST_CASE("full layer simple backpropagation test") {
 			network.backPropagationCycle();
 
 
-			if (i % 1001 == 0) {
-				//			cout << "======= Generation: " << i << " ======================" << endl;
-				//			mn_forX(outLayer->d, x) {
-				//				cout << "out: " << outLayer->a[x] << " vs " << network.getCurrentTrainingSet().output(x) << " = training" << endl;
-				//				cout << "outLayer.d: " << outLayer->d[x] << endl;
-				//			}
-				//			cout << "total error (C²): " << network.getTotalCost() << endl;
-			}
+//			if (i % 1001 == 0) {
+//				cout << "======= Generation: " << i << " ======================" << endl;
+//				cout << "error : " << network.getTotalCost() << endl;
+//
+//
+//				cout << "\n---result: \n";
+//				network.layers.back()->a.printXY();
+//				cout << "target: \n";
+//				network.getCurrentTrainingSet().output.printXY();
+//			}
 		}
 
 		auto costAfter = network.getTotalCost();
@@ -151,6 +154,31 @@ TEST_CASE("save test") {
 }
 
 
+TEST_CASE("dream test") {
+	ValueMap input(2, 2, 1, {1, 0, 1, 1});
+	ValueMap output(3, 1, 1, {0, 1, 0});
+
+	Network network({{input, output}});
+
+	network.pushLayer(new FullLayer(network.back(), 3));
+
+	auto errorBefore = network.getTotalCost();
+	cout << "Error before: " << errorBefore << endl;
+
+	for (int i = 0; i < 10; ++i) {
+		network.dreamCycle();
+//		cout << "error: " << network.getTotalCost() << endl;
+	}
+
+	auto errorAfter = network.getTotalCost();
+	cout << "Error after: " << errorAfter << endl;
+
+	network.inputLayer().a.printXY();
+	ASSERT_LT(errorAfter, errorBefore);
+
+}
+
+
 TEST_CASE("full layer four neuron bp test") {
 	{
 		std::vector<std::vector<std::vector<ValueType>>> data = {
@@ -182,16 +210,10 @@ TEST_CASE("full layer four neuron bp test") {
 
 		for (int i = 0; i < 60000; ++i) {
 			network.backPropagationCycle();
-
-
-//			if (i % 1001 == 0) {
-//				cout << "======= Generation: " << i << " ======================" << endl;
-//				mn_forX(outLayer->d, x) {
-//					cout << "out: " << outLayer->a[x] << " vs " << network.getCurrentTrainingSet().output(x) << " = training" << endl;
-//					cout << "outLayer.d: " << outLayer->d[x] << endl;
-//				}
-//				cout << "total error (C²): " << network.getTotalCost() << endl;
-//			}
+//			cout << "\n---result: \n";
+//			network.layers.back()->a.printXY();
+//			cout << "target: \n";
+//			network.getCurrentTrainingSet().output.printXY();
 		}
 
 		auto costAfter = network.getTotalCost();

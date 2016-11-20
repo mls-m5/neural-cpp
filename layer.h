@@ -96,7 +96,11 @@ public:
 	virtual void forward() override {};
 	virtual void prepareBackward() override {};
 	virtual void backward() override {};
-	virtual void correctErrors(ValueType) override {}
+	virtual void correctErrors(ValueType learningRate) override {
+		mn_forXYZ(a, x, y, z) {
+			a(x, y, z) -= d(x, y, z) * learningRate;
+		}
+	}
 };
 
 class ConvolutionLayer: public Layer {
