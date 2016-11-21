@@ -65,7 +65,7 @@ public:
 	virtual void correctErrors(ValueType learningRate) = 0;
 
 	static ValueType activationFunction(ValueType value) {
-		return 1. / (1. + exp(-value));
+		return 1. / (1. + exp(-value)); //Todo: optimize for performance
 	}
 
 	static ValueType activationDerivate(ValueType value) {

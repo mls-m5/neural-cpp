@@ -72,7 +72,7 @@ int main() {
 
 
 //	InputLayer input(inputMap);
-	Network network(sets);
+	Network network(new PatternTrainer(sets));
 
 
 	auto layer1 = new ConvolutionLayer(network.back(), 5, 5);
@@ -92,12 +92,13 @@ int main() {
 		network.backPropagationCycle();
 		cout << "generation: " << i << "/" << targetGeneration << endl;
 		cout << "Totalt fel: " << network.getTotalCost() << endl;
+		full2->a.printXY();
+		network.getCurrentTrainingSet().output.printXY();
 
 		if (i % 20 == 0) {
 			cout << "saving snap" << endl;
 //			saveValueMap(full2->a, "output/output.png");
-			network.trainingSets[network.currentTrainingSet].output.printXY();
-			full2->a.printXY();
+			network.trainer->getCurrent().output.printXY();
 
 //			full2->save(cout);
 

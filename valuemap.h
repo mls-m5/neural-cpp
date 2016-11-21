@@ -343,8 +343,8 @@ public:
 		}
 	};
 
-	typedef BoundCheckingVector VectorType;
-//	typedef std::vector<T> VectorType;
+//	typedef BoundCheckingVector VectorType; //Slower variant for debugging
+	typedef std::vector<T> VectorType;
 
 	VectorType _data;
 };
