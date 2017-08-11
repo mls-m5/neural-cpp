@@ -10,10 +10,12 @@
 #include <functional>
 #include <vector>
 #include <memory>
+#include <exception>
 
 #include "util.h"
 
 typedef float ValueType;
+typedef int dim_t;
 
 
 
@@ -56,7 +58,7 @@ public:
 	{
 		_data = m.data();
 	}
-	GenericValueMap(int w = 1, int h = 1, int d = 1, int c = 1):
+	GenericValueMap(dim_t w = 1, dim_t h = 1, dim_t d = 1, dim_t c = 1):
 		_width(w),
 		_height(h),
 		_depth(d),
@@ -64,7 +66,7 @@ public:
 		_data(w * h * d * c){
 	}
 
-	GenericValueMap(int w, int h, int d, std::vector<ValueType> data):
+	GenericValueMap(dim_t w, dim_t h, dim_t d, std::vector<ValueType> data):
 		_width(w),
 		_height(h),
 		_depth(d),
@@ -103,7 +105,7 @@ public:
 		return *this;
 	}
 
-	void resize(int w, int h, int d, int s) {
+	void resize(dim_t w, dim_t h, dim_t d, dim_t s) {
 		_width = w;
 		_height = h;
 		_depth = d;
@@ -111,23 +113,23 @@ public:
 		_data.resize(w * h * d * s);
 	}
 
-	auto width() const {
+	dim_t width() const {
 		return _width;
 	}
 
-	auto height() const {
+	dim_t height() const {
 		return _height;
 	}
 
-	auto depth() const {
+	dim_t depth() const {
 		return _depth;
 	}
 
-	auto spectrum() const {
+	dim_t spectrum() const {
 		return _spectrum;
 	}
 
-	auto size() const {
+	size_t size() const {
 		return _data.size();
 	}
 
@@ -160,7 +162,7 @@ public:
 		}
 	}
 
-	auto max() {
+	T max() {
 		ValueType m = -1000;
 		for (auto it: _data) {
 			if (it > m) {
@@ -171,7 +173,7 @@ public:
 	}
 
 
-	auto min() {
+	T min() {
 		ValueType m = 1000;
 		for (auto it: _data) {
 			if (it < m) {
@@ -201,6 +203,16 @@ public:
 		else {
 			return true;
 		}
+	}
+
+	void reshape(dim_t w, dim_t h = 1, dim_t d = 1, dim_t s = 1) {
+		if ((unsigned)(w * h * d * s) != _data.size()) {
+			throw std::range_error("valuemap: dimensions does not match");
+		}
+		_width = w;
+		_height = h;
+		_depth = d;
+		_spectrum = s;
 	}
 
 	T& operator()(const unsigned int x) {
@@ -252,7 +264,7 @@ public:
 	}
 
 	void load(std::istream &stream) {
-		int w, h, d, s;
+		dim_t w, h, d, s;
 		stream >> w;
 		stream >> h;
 		stream >> d;
@@ -321,10 +333,10 @@ public:
 	}
 
 //protected: //some strange error shows up when trying to make these protected
-	int _width;
-	int _height;
-	int _depth;
-	int _spectrum; //Naming forth dimension
+	dim_t _width;
+	dim_t _height;
+	dim_t _depth;
+	dim_t _spectrum; //Naming forth dimension
 
 	//For debugging
 	class BoundCheckingVector: public std::vector<T> {

@@ -123,7 +123,7 @@ public:
 
 	void add(TrainingSet set) {
 		if (set.output.height() != 1 || set.output.depth() != 1) {
-			throw std::range_error("Trainingset heaight and depth must be 1 for PatternTrainer");
+			throw std::range_error("Trainingset height and depth must be 1 for PatternTrainer");
 		}
 
 		ValueType max = -10000000;

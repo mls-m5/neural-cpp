@@ -306,6 +306,25 @@ TEST_CASE("conv layer, learn blur-filter") {
 
 }
 
+TEST_CASE("valuemap reshape test") {
+	ValueMap map1(2, 2, 1, {1, 2, 3, 4});
+	ValueMap map2(4, 1, 1, {1, 2, 3, 4});
+
+	map1.printXY();
+	map2.printXY();
+
+	map2.reshape(2, 2);
+	map2.printXY();
+
+	ASSERT_EQ(map1.width(), map2.width());
+	ASSERT_EQ(map1.height(), map2.height());
+
+	for (size_t i = 0; i < map1.size(); ++i) {
+		ASSERT_EQ(map1[i], map2[i]);
+	}
+
+}
+
 
 TEST_SUIT_END
 
