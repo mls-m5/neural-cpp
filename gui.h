@@ -13,7 +13,7 @@
 #include <string>
 
 void keepOpen();
-void showMap(ValueMap &map, std::string title = "map");
+void showMap(ValueMap &map, std::string title = "map", bool separateChannels = false);
 void waitDisplay(int ms);
 
 

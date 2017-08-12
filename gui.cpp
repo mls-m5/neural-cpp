@@ -24,14 +24,26 @@ void waitDisplay(int ms) {
 	displays.front().disp->wait(ms);
 }
 
-void showMap(ValueMap &map, std::string title) {
-	CImg<float> image(map.width() * map.depth(), map.height() * map.spectrum());
+void showMap(ValueMap &map, std::string title, bool separateChannels) {
+	CImg<float> image;
 
-	for (int c = 0; c < map.spectrum(); ++c) {
-		for (int z = 0; z < map.depth(); ++z) {
-			cimg_forXY(map, x, y) {
-				image(x + map.width() * z, y + map.height() * c) = map(x, y, z, c);
+
+
+	if (separateChannels) {
+		image.resize(map.width() * map.depth(), map.height() * map.spectrum());
+
+		for (int c = 0; c < map.spectrum(); ++c) {
+			for (int z = 0; z < map.depth(); ++z) {
+				cimg_forXY(map, x, y) {
+					image(x + map.width() * z, y + map.height() * c) = map(x, y, z, c);
+				}
 			}
+		}
+	}
+	else {
+		image.resize(map.width(), map.height(), map.depth(), map.spectrum());
+		cimg_for1(map.size(), i) {
+			image(i) = map(i);
 		}
 	}
 

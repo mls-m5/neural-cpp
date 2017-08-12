@@ -375,4 +375,15 @@ inline std::ostream &operator<<(std::ostream &stream, ValueMap &map) {
 ValueMap loadValueMapImg(std::string filename, int newWidth = 0, int newHeight = 0);
 void saveValueMapImg(ValueMap &map, std::string filename);
 
+struct TrainingData {
+	std::vector<ValueMap> xtr; //the data
+	std::vector<int> ytr; //Labels
+
+	std::vector<ValueMap> xte; //the data
+	std::vector<int> yte; //Labels
+};
+
+TrainingData loadCFAR10Binary(std::string filename, size_t limit = 0);
+
+
 

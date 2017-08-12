@@ -1,12 +1,14 @@
 
 
 #include <iostream>
-#include <algorithm>
 #include <cmath>
 #include <random>
 #include <vector>
 #include "gui.h"
 #include "network.h"
+
+using namespace std;
+
 
 void test1() {
 	ValueMap inputMap(loadValueMapImg("linus.png", 100, 100));
@@ -98,13 +100,13 @@ void test2() {
 
 
 
+
 int main(int, char **) {
 	cout << "startar neuronnät" << endl;
 
-	test1();
+	test1(); //was latest used
 //	test2();
 
 
 	std::exit(0);
 }
-
