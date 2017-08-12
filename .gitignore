@@ -13,4 +13,6 @@ common.dep
 trainingsets/cifar-10-batches-bin/
 snapshot.txt
 
+mod1nn
+
 output/

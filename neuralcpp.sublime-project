@@ -3,11 +3,14 @@
 	[
 		{
 			"path": "."
+		},
+		{
+			"path": "src"
 		}
 	],
-
-    "settings": {
-        "sublimegdb_commandline": "gdb -nx -readnow -fullname --interpreter=mi -args ./main",
-        "sublimegdb_workingdir": "${folder:${project_path:./main}}"
-    }
+	"settings":
+	{
+		"sublimegdb_commandline": "gdb -nx -readnow -fullname --interpreter=mi -args ./mod1nn",
+		"sublimegdb_workingdir": "${folder:${project_path:./mod1nn}}"
+	}
 }
