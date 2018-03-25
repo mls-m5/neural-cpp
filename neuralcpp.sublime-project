@@ -10,7 +10,7 @@
 	],
 	"settings":
 	{
-		"sublimegdb_commandline": "gdb -nx -readnow -fullname --interpreter=mi -args ./mod1nn",
-		"sublimegdb_workingdir": "${folder:${project_path:./mod1nn}}"
+		"sublimegdb_commandline": "gdb -nx -readnow -fullname --interpreter=mi -args ./mod2svm",
+		"sublimegdb_workingdir": "${folder:${project_path:./mod2svm}}"
 	}
 }

@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"random",
+				"randomizeMap\t(valuemap.h)"
+			],
+			[
+				"object",
+				"OBJECTS"
+			],
+			[
+				"shrink_to_fit",
+				"shrink_to_fit\tvoid shrink_to_fit()"
+			],
+			[
 				"separa",
 				"separateChannels"
 			],
@@ -344,35 +356,65 @@
 	"buffers":
 	[
 		{
-			"file": "layer.cpp",
+			"file": ".gitignore",
 			"settings":
 			{
-				"buffer_size": 3255,
+				"buffer_size": 143,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "Searching 38 files for \"showMap\"\n\n/home/mattias/Prog/Experiment/neuralc++/gui.cpp:\n   25  }\n   26  \n   27: void showMap(ValueMap &map, std::string title) {\n   28  \tCImg<float> image(map.width() * map.depth(), map.height() * map.spectrum());\n   29  \n\n/home/mattias/Prog/Experiment/neuralc++/gui.h:\n   14  \n   15  void keepOpen();\n   16: void showMap(ValueMap &map, std::string title = \"map\");\n   17  void waitDisplay(int ms);\n   18  \n\n/home/mattias/Prog/Experiment/neuralc++/main:\n    <binary>\n\n/home/mattias/Prog/Experiment/neuralc++/main.cpp:\n   47  \t}\n   48  \n   49: \tshowMap(inputMap);\n   50: \tshowMap(layer1->net, \"layer 1\");\n   51: \tshowMap(layer1->kernel, \"layer 1 - kernel\");\n   52: \tshowMap(pool->a, \"pool 1\");\n   53: \tshowMap(layer2->net, \"layer 2\");\n   54: \tshowMap(layer2->kernel, \"layer 2 - kernel\");\n   55: \tshowMap(pool2->a, \"pool 2\");\n   56: \tshowMap(std1->a);\n   57: \tshowMap(full2->a, \"output\");\n   58  \tkeepOpen();\n   59  }\n   ..\n   94  \t}\n   95  \n   96: \tshowMap(network.layers[0]->a);\n   97: \tshowMap(outLayer->a, \"output\");\n   98: \tshowMap(outLayer->kernel, \"out kernel\");\n   99  \tkeepOpen();\n  100  }\n  ...\n  107  \n  108  \t// data.second[0].printXY();\n  109: \tshowMap(data.second[0]);\n  110  \tkeepOpen();\n  111  \n\n/home/mattias/Prog/Experiment/neuralc++/training.cpp:\n  108  \t}\n  109  \n  110: //\tshowMap(inputMap);\n  111: //\tshowMap(layer1->net, \"layer 1\");\n  112: //\tshowMap(layer1->kernel, \"layer 1 - kernel\");\n  113: //\tshowMap(pool->a, \"pool 1\");\n  114: //\tshowMap(layer2->net, \"layer 2\");\n  115: //\tshowMap(layer2->kernel, \"layer 2 - kernel\");\n  116: //\tshowMap(pool2->a, \"pool 2\");\n  117: //\tshowMap(std1->a);\n  118  //\tsaveValueMap(full2->a, \"output/output.png\");\n  119  //\tkeepOpen();\n\n26 matches across 5 files\n",
+			"file": "README.md",
 			"settings":
 			{
-				"buffer_size": 1742,
+				"buffer_size": 134,
+				"encoding": "UTF-8",
 				"line_ending": "Unix",
-				"name": "Find Results",
-				"scratch": true
+				"name": "README.md"
 			}
 		},
 		{
-			"file": "gui.cpp",
+			"file": "src/Makefile",
 			"settings":
 			{
-				"buffer_size": 1512,
+				"buffer_size": 1117,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "layer.h",
+			"file": "src/main.cpp",
+			"settings":
+			{
+				"buffer_size": 2706,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/mod1nn.cpp",
+			"settings":
+			{
+				"buffer_size": 2579,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "\n\n\n#include <iostream>\n#include <cmath>\n#include <random>\n#include <vector>\n#include \"gui.h\"\n#include \"network.h\"\n\nusing namespace std;\n\nclass SVM {\npublic:\n    SVM(int numberOfLabels):\n    W(numberOfLabels),\n    bias(numberOfLabels)\n    {\n        for (auto &w: W) {\n            w.resize(32,32,3);\n            w.random();\n        }\n    }\n\n    void train(ValueMapVector &Xtr, LabelVector &Ytr) {\n\n        //Problem 1 hur använder man loss-funktionen för att träna upp lagret\n    }\n\n    vector<int> predict(ValueMapVector &Xte) {\n        vector <int> result;\n        result.resize(Xte.size());\n\n        for (size_t i = 0; i < Xte.size(); ++i) {\n            result[i] = Xte[i]\n\n        }\n\n        return result;\n\n    }\n\n    //Loss is called L in some examples\n    float loss(ValueMap &x, unsigned int y) {\n        float delta = 1.;\n        // vector <float> scores(W.size());\n        float lossResult = 0;\n\n\n        float correctClassScore = W[y].dot(x) + bias[y];\n\n        for (size_t i = 0; i < W.size(); ++i) {\n            auto &w = W[i];\n            auto score = w.dot(x) + bias[i];\n\n            lossResult += (i != y) * max((float)0., score - correctClassScore + delta);\n        }\n\n        return lossResult;\n    }\n\n    //Same as loss with small letters but with vectors\n    vector <float> Loss(ValueMapVector &X, LabelVector &Y) {\n        vector <float> result(X.size());\n        for (size_t i = 0; i < X.size(); ++i) {\n            result[i] = loss(X[i], Y[i]);\n        }\n        return result;\n    }\n\n    ValueMapVector W;\n    vector <float> bias;\n};\n\n\nvoid doSVM() {\n    cout << \"Starting SVM-test\" << endl;\n\n    SVM svm(10);\n\n\n    vector<ValueMap> xte;\n    vector<int> yte;\n\n    {\n        cout << \"loading cfar10\" << endl;\n        auto data = loadCFAR10Binary(\"trainingsets/cifar-10-batches-bin/\");\n        cout << \"loading complete\" << endl;\n        cout << \"training data\" << endl;\n        svm.train(data.xtr, data.ytr);\n\n        xte = move(data.xte);\n        yte = move(data.yte);\n\n        showMap(xte[3], \"SVM\", false);\n    }   \n\n    cout << \"predicting data\" << endl;\n    auto prediction = svm.predict(xte);\n\n    for (auto p: prediction) {\n        cout << \"prediction \" << p << endl;\n    }\n\n    auto cost1 = svm.loss(xte[0], yte[0]);\n\n    cout << \"testing complete\" << endl;\n    cout << \"cost first sample = \" << cost1 << endl;\n\n    // for (size_t i = 0; i < prediction.size() * 0 + 1000; ++i) {\n    //  cout << i << \": \" << data.yte[i] << \" -> \" << prediction[i] << endl;\n    // }\n\n\n    // data.second[0].printXY();\n    keepOpen();\n}\n\n\n\nint main() {\n    doSVM();\n}",
+			"file": "src/mod2svm.cpp",
+			"file_size": 2513,
+			"file_write_time": 131470193383782606,
+			"settings":
+			{
+				"buffer_size": 2576,
+				"line_ending": "Unix",
+				"name": "mod2svm.cpp"
+			}
+		},
+		{
+			"file": "src/layer.h",
 			"settings":
 			{
 				"buffer_size": 9036,
@@ -380,51 +422,52 @@
 			}
 		},
 		{
-			"file": "valuemap.h",
+			"file": "src/valuemap.h",
 			"settings":
 			{
-				"buffer_size": 8249,
+				"buffer_size": 8946,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "main.cpp",
+			"file": "src/util.h",
 			"settings":
 			{
-				"buffer_size": 4544,
+				"buffer_size": 379,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "gui.h",
+			"file": "src/network.h",
 			"settings":
 			{
-				"buffer_size": 261,
+				"buffer_size": 6671,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": ".clang_complete",
+			"file": "src/util.cpp",
 			"settings":
 			{
-				"buffer_size": 20,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "network.h",
-			"settings":
-			{
-				"buffer_size": 6665,
+				"buffer_size": 435,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "test.cpp",
+			"file": "neuralcpp.sublime-project",
+			"settings":
+			{
+				"buffer_size": 247,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/test.cpp",
 			"settings":
 			{
 				"buffer_size": 7230,
@@ -436,8 +479,10 @@
 			"file": "Makefile",
 			"settings":
 			{
-				"buffer_size": 746,
-				"line_ending": "Unix"
+				"buffer_size": 20,
+				"encoding": "UTF-8",
+				"line_ending": "Unix",
+				"name": "Makefile"
 			}
 		}
 	],
@@ -480,16 +525,52 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 72.0,
-		"last_filter": "",
+		"height": 148.0,
+		"last_filter": "stop",
 		"selected_items":
 		[
 			[
-				"rena",
-				"File: Rename"
+				"stop",
+				"SublimeGDB: Stop Debugging"
+			],
+			[
+				"folder",
+				"Project: Add Folder"
+			],
+			[
+				"syntax c++",
+				"Set Syntax: C++"
+			],
+			[
+				"makefile",
+				"Set Syntax: Makefile"
+			],
+			[
+				"key",
+				"Preferences: Key Bindings"
+			],
+			[
+				"stop de",
+				"SublimeGDB: Stop Debugging"
+			],
+			[
+				"breakp",
+				"SublimeGDB: Open Breakpoint View"
+			],
+			[
+				"sublime",
+				"SublimeGDB: Stop Debugging"
+			],
+			[
+				"delete",
+				"File: Delete"
 			],
 			[
 				"rename",
+				"File: Rename"
+			],
+			[
+				"rena",
 				"File: Rename"
 			],
 			[
@@ -649,7 +730,7 @@
 				"Build With: TypeScript"
 			]
 		],
-		"width": 476.0
+		"width": 331.0
 	},
 	"console":
 	{
@@ -671,13 +752,29 @@
 	},
 	"expanded_folders":
 	[
-		"/home/mattias/Prog/Experiment/neuralc++"
+		"/home/mattias/Prog/Experiment/neuralc++",
+		"/home/mattias/Prog/Experiment/neuralc++/src"
 	],
 	"file_history":
 	[
+		"/home/mattias/Prog/Experiment/neuralc++/valuemap.h",
+		"/home/mattias/Prog/Experiment/neuralc++/src/util.h",
+		"/home/mattias/Prog/Experiment/neuralc++/mod2svm.cpp",
+		"/build/glibc-bfm8X4/glibc-2.23/sysdeps/unix/sysv/linux/raise.c",
+		"/home/mattias/Prog/Experiment/neuralc++/main.cpp",
+		"/home/mattias/Prog/Experiment/neuralc++/gui.h",
+		"/home/mattias/Prog/Experiment/neuralc++/mod1nn.cpp",
+		"/home/mattias/Prog/Experiment/neuralc++/Makefile",
+		"/home/mattias/Prog/Experiment/neuralc++/layer.cpp",
+		"/home/mattias/Prog/Experiment/neuralc++/gui.cpp",
+		"/home/mattias/Prog/Experiment/neuralc++/layer.h",
+		"/home/mattias/Prog/Experiment/neuralc++/neuralcpp.sublime-project",
+		"/home/mattias/Prog/Experiment/neuralc++/.clang_complete",
+		"/home/mattias/Prog/Experiment/neuralc++/network.h",
+		"/home/mattias/Prog/Experiment/neuralc++/test.cpp",
+		"/home/mattias/Prog/Experiment/neuralc++/sublimegdb_settings.sublime-settings",
 		"/home/mattias/Prog/Experiment/neuralc++/CImg.h",
 		"/usr/include/c++/5.4.0/stdexcept",
-		"/home/mattias/Prog/Experiment/neuralc++/.clang_complete",
 		"/home/www/translate-nearest/wordlist.txt",
 		"/home/mattias/Prog/Experiment/ai/py3/nearestneighbour.py",
 		"/home/mattias/Prog/Experiment/ai/x/utils.py",
@@ -787,22 +884,7 @@
 		"/home/mattias/Prog/Projekt/Squeezed tomatoes (ts)/src/iline.ts",
 		"/home/mattias/Prog/Projekt/Squeezed tomatoes (ts)/src/blaster.ts",
 		"/home/mattias/Prog/Projekt/Squeezed tomatoes (ts)/app.min.js",
-		"/home/mattias/Prog/Projekt/Squeezed tomatoes (ts)/src/airstrike.ts",
-		"/home/mattias/Prog/Experiment/vb2ts/src/wfirebomb.ts",
-		"/home/mattias/Prog/Projekt/Squeezed tomatoes (ts)/src/airstrike.js",
-		"/home/mattias/.config/sublime-text-3/Packages/TypeScript/tsserver/lib.d.ts",
-		"/home/mattias/Prog/Projekt/Squeezed tomatoes (ts)/src/form.ts",
-		"/home/mattias/Prog/Experiment/vb2ts/src/interpreter.ts",
-		"/home/mattias/Prog/Experiment/vb2ts/src/tests/interpreter.ts",
-		"/home/mattias/Skrivbord/pernilla.html",
-		"/home/mattias/Prog/Experiment/vb2ts/src/tokenizer.ts",
-		"/home/mattias/Prog/Experiment/vb2ts/src/tokenizer.js",
-		"/home/mattias/.config/sublime-text-3/Packages/User/Preferences.sublime-settings",
-		"/home/mattias/Prog/Experiment/vb2ts/src/Makefile",
-		"/home/mattias/Prog/Experiment/vb2ts/index.html",
-		"/home/mattias/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
-		"/home/mattias/Prog/Experiment/vb2ts/src/main.ts",
-		"/home/mattias/Prog/Experiment/vb2ts/app.min.js"
+		"/home/mattias/Prog/Projekt/Squeezed tomatoes (ts)/src/airstrike.ts"
 	],
 	"find":
 	{
@@ -821,6 +903,12 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"begin",
+			"1",
+			"i2str",
+			"test.o",
+			"fstream",
+			"util.o",
 			" *",
 			"filst",
 			"first",
@@ -942,13 +1030,7 @@
 			"textContent",
 			"createNotation",
 			"pushWord",
-			"push",
-			"moveInput",
-			"popNextWord",
-			"finishRound",
-			"moveInput",
-			"inputBox",
-			"createChart"
+			"push"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1000,333 +1082,24 @@
 	"groups":
 	[
 		{
-			"selected": 5,
+			"selected": 6,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "layer.cpp",
+					"file": ".gitignore",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3255,
+						"buffer_size": 143,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2465,
-								2465
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 1342.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1742,
-						"regions":
-						{
-							"match":
-							{
-								"flags": 112,
-								"regions":
-								[
-									[
-										112,
-										119
-									],
-									[
-										341,
-										348
-									],
-									[
-										570,
-										577
-									],
-									[
-										597,
-										604
-									],
-									[
-										638,
-										645
-									],
-									[
-										691,
-										698
-									],
-									[
-										727,
-										734
-									],
-									[
-										768,
-										775
-									],
-									[
-										821,
-										828
-									],
-									[
-										858,
-										865
-									],
-									[
-										884,
-										891
-									],
-									[
-										974,
-										981
-									],
-									[
-										1013,
-										1020
-									],
-									[
-										1053,
-										1060
-									],
-									[
-										1182,
-										1189
-									],
-									[
-										1318,
-										1325
-									],
-									[
-										1347,
-										1354
-									],
-									[
-										1390,
-										1397
-									],
-									[
-										1445,
-										1452
-									],
-									[
-										1483,
-										1490
-									],
-									[
-										1526,
-										1533
-									],
-									[
-										1581,
-										1588
-									],
-									[
-										1620,
-										1627
-									]
-								],
-								"scope": ""
-							}
-						},
-						"selection":
-						[
-							[
-								115,
-								115
-							]
-						],
-						"settings":
-						{
-							"default_dir": "/home/mattias/Prog/Experiment/neuralc++",
-							"detect_indentation": false,
-							"line_numbers": false,
-							"output_tag": 1,
-							"result_base_dir": "",
-							"result_file_regex": "^([^ \t].*):$",
-							"result_line_regex": "^ +([0-9]+):",
-							"scroll_past_end": true,
-							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "gui.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1512,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								868,
-								868
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 380.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "layer.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9036,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								7584,
-								7584
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 4830.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "valuemap.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 8249,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								238,
-								238
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "main.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4544,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1015,
-								1015
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 16.0,
-						"translation.y": 675.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "gui.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 261,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								11,
-								11
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 264.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": ".clang_complete",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 20,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
+								133,
+								133
 							]
 						],
 						"settings":
@@ -1337,82 +1110,53 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 10,
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "network.h",
+					"buffer": 1,
+					"file": "README.md",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 6665,
+						"buffer_size": 134,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2292,
-								2292
+								134,
+								134
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": -0.0,
-						"translation.y": 1521.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "test.cpp",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 7230,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6384,
-								6384
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"auto_name": "README.md",
+							"syntax": "Packages/Markdown/Markdown.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 3401.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 7,
+					"stack_index": 13,
 					"type": "text"
 				},
 				{
-					"buffer": 10,
-					"file": "Makefile",
+					"buffer": 2,
+					"file": "src/Makefile",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 746,
+						"buffer_size": 1117,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								679,
+								679
 							]
 						],
 						"settings":
@@ -1423,7 +1167,325 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 10,
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "src/main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2706,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								326,
+								326
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 9,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "src/mod1nn.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2579,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								345,
+								345
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 8,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/mod2svm.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2576,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1181,
+								1181
+							]
+						],
+						"settings":
+						{
+							"auto_name": "mod2svm.cpp",
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 335.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/layer.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9036,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								8122,
+								8122
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 5022.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "src/valuemap.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8946,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7296,
+								7296
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 4896.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "src/util.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 379,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								285,
+								285
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "src/network.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 6671,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4850,
+								4850
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 3231.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 7,
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "src/util.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 435,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								432,
+								432
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "neuralcpp.sublime-project",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 247,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								234,
+								234
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JSON.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "src/test.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7230,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								196,
+								196
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 11,
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "Makefile",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 20,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								20,
+								20
+							]
+						],
+						"settings":
+						{
+							"auto_name": "Makefile",
+							"syntax": "Packages/Makefile/Makefile.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 12,
 					"type": "text"
 				}
 			]
@@ -1431,7 +1493,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 23.0
+		"height": 34.0
 	},
 	"input":
 	{
@@ -1498,12 +1560,140 @@
 		"selected_items":
 		[
 			[
+				"layer.h",
+				"src/layer.h"
+			],
+			[
+				"mod2",
+				"src/mod2svm.cpp"
+			],
+			[
+				"make",
+				"src/Makefile"
+			],
+			[
+				"makefile",
+				"src/Makefile"
+			],
+			[
+				"mod2sv",
+				"src/mod2svm.cpp"
+			],
+			[
+				"neu",
+				"neuralc++/neuralcpp.sublime-project"
+			],
+			[
+				"valuemap",
+				"src/valuemap.h"
+			],
+			[
+				"vau",
+				"src/valuemap.h"
+			],
+			[
+				"valuema",
+				"src/valuemap.h"
+			],
+			[
+				"mod2s",
+				"src/mod2svm.cpp"
+			],
+			[
+				"util.cp",
+				"src/util.cpp"
+			],
+			[
+				"util.h",
+				"src/util.h"
+			],
+			[
+				"util.c",
+				"src/util.cpp"
+			],
+			[
+				"network.h",
+				"src/network.h"
+			],
+			[
+				"value",
+				"src/valuemap.h"
+			],
+			[
+				"util",
+				"src/util.h"
+			],
+			[
+				"svm",
+				"src/mod2svm.cpp"
+			],
+			[
+				"mod1",
+				"src/mod1nn.cpp"
+			],
+			[
+				"layer",
+				"src/layer.h"
+			],
+			[
+				"mod1c",
+				"src/mod1nn.cpp"
+			],
+			[
+				"mod2scp",
+				"src/mod2svm.cpp"
+			],
+			[
+				"neuralc",
+				"neuralc++/neuralcpp.sublime-project"
+			],
+			[
+				"makef",
+				"src/Makefile"
+			],
+			[
+				"mod",
+				"src/mod1nn.cpp"
+			],
+			[
+				".gitig",
+				"neuralc++/.gitignore"
+			],
+			[
+				".sublime",
+				"neuralc++/neuralcpp.sublime-project"
+			],
+			[
+				"main.cp",
+				"src/main.cpp"
+			],
+			[
+				"test.c",
+				"src/test.cpp"
+			],
+			[
+				"makefil",
+				"src/Makefile"
+			],
+			[
+				".gitign",
+				".gitignore"
+			],
+			[
+				"gui.h",
+				"gui.h"
+			],
+			[
 				"main",
 				"main.cpp"
 			],
 			[
-				"value",
-				"valuemap.h"
+				"makife",
+				"Makefile"
+			],
+			[
+				".sublime-project",
+				"neuralcpp.sublime-project"
 			],
 			[
 				"",
@@ -1512,14 +1702,6 @@
 			[
 				"layer.c",
 				"layer.cpp"
-			],
-			[
-				"layer",
-				"layer.cpp"
-			],
-			[
-				"layer.h",
-				"layer.h"
 			],
 			[
 				"main.c",
@@ -1542,28 +1724,12 @@
 				"gui.cpp"
 			],
 			[
-				"gui.h",
-				"gui.h"
-			],
-			[
 				"gui",
 				"gui.h"
 			],
 			[
 				"clang",
 				".clang_complete"
-			],
-			[
-				"network.h",
-				"network.h"
-			],
-			[
-				"test.c",
-				"test.cpp"
-			],
-			[
-				"makefile",
-				"Makefile"
 			],
 			[
 				"wordli",
@@ -1602,10 +1768,6 @@
 				"style.css"
 			],
 			[
-				"makefil",
-				"Makefile"
-			],
-			[
 				"index",
 				"index.html"
 			],
@@ -1616,10 +1778,6 @@
 			[
 				"wordlist",
 				"wordlist.js"
-			],
-			[
-				"make",
-				"Makefile"
 			],
 			[
 				"statist",
@@ -1912,102 +2070,6 @@
 			[
 				"compani",
 				"data/borsdata/companylist.txt"
-			],
-			[
-				"compan",
-				"data/borsdata/companyinfo.json"
-			],
-			[
-				"company",
-				"data/borsdata/companyinfo.json"
-			],
-			[
-				"dataman",
-				"src/datamanagement.ts"
-			],
-			[
-				"log",
-				"data/avanza/log.txt"
-			],
-			[
-				"download_all_sto",
-				"data/avanza/download_all_stock_info.sh"
-			],
-			[
-				"download_keyn",
-				"data/borsdata/keyvalues/download_key_numbers.sh"
-			],
-			[
-				"download_ke",
-				"data/borsdata/keyvalues/download_key_number.sh"
-			],
-			[
-				"download_inf",
-				"data/avanza/download_info_page.sh"
-			],
-			[
-				"data",
-				"src/datamanagement.ts"
-			],
-			[
-				"stock_li",
-				"data/avanza/stock_list.txt"
-			],
-			[
-				"bea",
-				"data/avanza/beautify_all.sh"
-			],
-			[
-				"beaut",
-				"data/avanza/beautify_json.py"
-			],
-			[
-				"fund_l",
-				"data/avanza/fund_list.txt"
-			],
-			[
-				"log.t",
-				"data/avanza/log.txt"
-			],
-			[
-				"fund_list",
-				"data/avanza/fund_list.txt"
-			],
-			[
-				"stock",
-				"data/avanza/stock_list.txt"
-			],
-			[
-				"list.t",
-				"data/avanza/list.txt"
-			],
-			[
-				"list",
-				"data/avanza/list.txt"
-			],
-			[
-				"apps",
-				"app.js"
-			],
-			[
-				"rename",
-				"data/borsdata/keyvalues/rename_keys.py"
-			],
-			[
-				"merge_values",
-				"data/borsdata/keyvalues/merge_values.py"
-			],
-			[
-				"merge_al",
-				"data/borsdata/keyvalues/merge_all.sh"
-			],
-			[
-				"missing.t",
-				"data/borsdata/keyvalues/missing.txt"
-			],
-			[
-				"merge",
-				"data/borsdata/keyvalues/merge_values.py"
 			]
 		],
 		"width": 0.0
