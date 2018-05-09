@@ -11,6 +11,7 @@
 #include <vector>
 #include <memory>
 #include <exception>
+#include <stdexcept>
 #include <algorithm>
 
 #include "util.h"
@@ -76,6 +77,16 @@ public:
 	}
 
 	void setData(T *data) {
+		mn_for1(_data.size(), i) {
+			_data[i] = data[i];
+		}
+	}
+
+	template <class U>
+	void setData (std::vector<U> &data) {
+		if (data.size() > _data.size()) {
+			throw std::out_of_range("trying to assign to large data to valuemap");
+		}
 		mn_for1(_data.size(), i) {
 			_data[i] = data[i];
 		}
@@ -174,7 +185,41 @@ public:
 		}
 	}
 
-	T max() {
+	T sum() const {
+		double sum = 0;
+		for (auto it: _data) {
+			sum += it;
+		}
+		return sum;
+	}
+
+	T abs() const {
+		return sqrt(abs2());
+	}
+
+
+	T abs2() const {
+		double sum = 0;
+		for (auto it: _data) {
+			sum += it * it;
+		}
+		return sum;
+	}
+
+	ValueMap &normalize() {
+		*this *= (1. / abs());
+		return *this;
+	}
+
+	T mean() const {
+		double cumulative = 0;
+		for (auto it: _data) {
+			cumulative += it;
+		}
+		return cumulative / _data.size();
+	}
+
+	T max() const {
 		ValueType m = -1000;
 		for (auto it: _data) {
 			if (it > m) {
@@ -185,7 +230,7 @@ public:
 	}
 
 
-	T min() {
+	T min() const {
 		ValueType m = 1000;
 		for (auto it: _data) {
 			if (it < m) {
@@ -196,7 +241,7 @@ public:
 	}
 
 	//Set the values to between 0 and 1
-	ValueMap &normalze() {
+	ValueMap &autoScale() {
 		auto max = this->max();
 		auto min = this->min();
 
@@ -207,8 +252,28 @@ public:
 		return *this;
 	}
 
-	//Check if dimensions is the same
-	bool isDimensionsSame(ValueMap &other) {
+	//Center values around 0 and set range from -1 to 1
+	ValueMap &prepare() {
+		*this -= mean();
+
+		auto min = this->min();
+		auto max = this->max();
+
+		auto factor = 1.;
+		if (-min > max) {
+			factor = 1. / -min;
+		}
+		else {
+			factor = 1. / max;
+		}
+
+		*this *= factor;
+
+		return *this;
+	}
+
+	//Check if dimensions are the same
+	bool isDimensionsSame(ValueMap &other) const {
 		if (other.width() != width() || other.height() != height() || other.depth() != depth() || other.spectrum() != spectrum()) {
 			return false;
 		}
@@ -269,7 +334,26 @@ public:
 
 	std::string toString() {
 		using namespace util;
-		return "<ValueMap (" + i2str(width()) + ", " + i2str(height()) + ", " + i2str(depth()) + ", " + i2str(spectrum()) + ")>";
+		return "<ValueMap (" + i2str(width()) + "x" + i2str(height()) + "x"  + i2str(depth()) + "x" + i2str(spectrum()) + ": [" + shortContentSummary() + "])>";
+	}
+
+	//Used to show a short version of the content of the vector
+	std::string shortContentSummary(size_t maxLen = 10) {
+		using namespace util;
+		std::string result;
+
+		for (size_t i = 0; i < size() && i < maxLen; ++i) {
+			if (!result.empty()) {
+				result += ", ";
+			}
+			result += i2str(this->operator [](i));
+		}
+
+		if (size() > maxLen) {
+			result += " ...";
+		}
+
+		return result;
 	}
 
 	operator std::string() {
@@ -389,8 +473,13 @@ ValueMap &operator op (ValueType value) { \
 		}
 	};
 
-//	typedef BoundCheckingVector VectorType; //Slower variant for debugging
+
+//#define VALUEMAP_VECTOR_CHECK_BOUNDS
+#ifdef VALUEMAP_VECTOR_CHECK_BOUNDS
+	typedef BoundCheckingVector VectorType; //Slower variant for debugging
+#else
 	typedef std::vector<T> VectorType;
+#endif
 
 	VectorType _data;
 };
@@ -416,11 +505,12 @@ struct TrainingData {
 	ValueMapVector xtr; //the data
 	LabelVector ytr; //Labels
 
-	ValueMapVector xte; //the data
-	LabelVector yte; //Labels
+	ValueMapVector xte; //the test data
+	LabelVector yte; //Labels to test data
 };
 
 TrainingData loadCFAR10Binary(std::string filename, size_t limit = 0);
+TrainingData loadMNISTBinary(std::string filename);
 
 
 

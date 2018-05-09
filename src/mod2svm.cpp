@@ -23,16 +23,50 @@ public:
     }
 
     void train(ValueMapVector &Xtr, LabelVector &Ytr) {
-
         //Problem 1 hur använder man loss-funktionen för att träna upp lagret
+    	//Jag tror att man gör det genom att man på något sätt räknar ut ett medelvärde för alla bilder
+
+    	cout << "training support vector machine" << endl;
+
+        for (size_t i = 0; i < W.size(); ++i) {
+        	int numberInCategory = 0;
+        	W[i].fill(0);
+        	for (size_t j = 0; j < Xtr.size(); ++j) {
+        		if ((size_t)Ytr[j] == i) {
+        			++numberInCategory;
+        			W[i] += Xtr[j];
+        		}
+        	}
+        	W[i] /= numberInCategory; //Mean
+        	bias[i] = W[i].abs();
+        	W[i] *= (1. / bias[i]); //Normalize
+//        	bias[i] = 0;
+        }
+
+        //Continue here
     }
 
     vector<int> predict(ValueMapVector &Xte) {
-        vector <int> result;
+        vector <int> result(Xte.size());
+
+
+//        ValueMap temp;
 
         for (size_t i = 0; i < Xte.size(); ++i) {
+        	double loss = 1000000;
+        	for (size_t j = 0; j < W.size(); ++j) {
+        		double newLoss = abs(Xte[i].dot(W[j]) - bias[j]);
+//        		temp = Xte[i];
+//        		temp -= W[j];
+//        		double newLoss = temp.sum();
 
+        		if (newLoss < loss) {
+        			loss = newLoss;
+        			result[i] = j;
+        		}
+        	}
         }
+
 
         return result;
 
@@ -76,7 +110,6 @@ void doSVM() {
 
     SVM svm(10);
 
-
     vector<ValueMap> xte;
     vector<int> yte;
 
@@ -90,15 +123,52 @@ void doSVM() {
         xte = move(data.xte);
         yte = move(data.yte);
 
+        int numLabels = 0;
+        for (int i = 0; i < (int)data.ytr.size(); ++i) {
+        	if (data.ytr[i] > numLabels) {
+        		numLabels = data.ytr[i];
+        	}
+        }
+
+        for (int i = 0; i < numLabels; ++i) {
+        	int c = 0;
+        	for (int j = 0; j < (int)data.xtr.size(); ++j) {
+        		c += (data.ytr[j] == i);
+        	}
+        	//cout << "numbers in category " << i << ": " << c << endl;
+        }
+
+        cout << "Xsamples: " << data.ytr.size() << ", etiketter " << numLabels + 1 << endl;
+        cout << "Test samples: " << yte.size() << endl;
+
+//        xte[3].prepare();
         showMap(xte[3], "SVM", false);
+
+        showMap(svm.W[1], "mean");
+
+
+        cout << "Test: " << xte[3].toString() << endl;
     }   
 
     cout << "predicting data" << endl;
     auto prediction = svm.predict(xte);
 
-    for (auto p: prediction) {
-        cout << "prediction " << p << endl;
+    size_t right = 0;
+
+    for (size_t i = 0; i < prediction.size(); ++i) {
+    	if (prediction[i] == yte[i]) {
+    		++right;
+    	}
     }
+
+    double percentage = (float) right / prediction.size();
+
+    cout << "Amount right: " << percentage << endl;
+
+
+//    for (auto p: prediction) {
+//        cout << "prediction " << p << endl;
+//    }
 
     auto cost1 = svm.loss(xte[0], yte[0]);
 

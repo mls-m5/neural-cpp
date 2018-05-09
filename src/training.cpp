@@ -42,7 +42,8 @@ int main() {
 
 	for (auto name: filenames) {
 		ValueMap input(loadValueMapImg("trainingsets/fixed/" + name));
-		input.normalze();
+//		input.normalze();
+		input.prepare();
 		size_t outputNum = 0;
 		for (auto type: typeMap) {
 			if(name.find(type.first) == 2) {

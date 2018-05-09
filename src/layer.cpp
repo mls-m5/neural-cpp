@@ -10,6 +10,9 @@
 #include "layer.h"
 #include <fstream>
 #include <iostream>
+#include <functional>
+
+#include <stdint.h> //For uint_32
 
 using namespace cimg_library;
 using namespace std;
@@ -150,3 +153,136 @@ TrainingData loadCFAR10Binary(std::string pathname, size_t limit) {
 
 	return data;
 }
+
+
+// From https://stackoverflow.com/questions/12791864/c-program-to-check-little-vs-big-endian
+//Check if system is big endian
+int is_big_endian(void)
+{
+    union {
+        uint32_t i;
+        char c[4];
+    } e = { 0x01000000 };
+
+    return e.c[0];
+}
+
+
+const int systemBigEndian = is_big_endian();
+
+
+int flipInt(int value) {
+	union {
+		int intIn;
+		char charIn[4];
+	};
+
+	intIn = value;
+
+	union {
+		int intOut;
+		char charOut[4];
+	};
+
+	for (size_t i = 0; i < sizeof(int); ++i) {
+		charOut[3 - i] = charIn[i];
+	}
+
+	return intOut;
+}
+
+uint32_t correctMNISTEndian(uint32_t value) {
+	if (systemBigEndian) {
+		return value;
+	}
+	else {
+		return flipInt(value);
+	}
+}
+
+TrainingData loadMNISTBinary(std::string filename) {
+	TrainingData data;
+
+	auto loadImages = [] (std::string filename) {
+		//File format image files
+//		[offset] [type]          [value]          [description]
+//		0000     32 bit integer  0x00000803(2051) magic number
+//		0004     32 bit integer  60000            number of images
+//		0008     32 bit integer  28               number of rows
+//		0012     32 bit integer  28               number of columns
+//		0016     unsigned byte   ??               pixel
+//		0017     unsigned byte   ??               pixel
+//		........
+//		xxxx     unsigned byte   ??               pixel
+
+		ifstream file(filename);
+		uint32_t rawData[4];
+
+		file.read((char*)rawData, sizeof (uint32_t) * 4);
+
+		uint32_t magicNumber = correctMNISTEndian(rawData[0]);
+		uint32_t imageCount = correctMNISTEndian(rawData[1]);
+		uint32_t rows = correctMNISTEndian(rawData[2]);;
+		uint32_t columns = correctMNISTEndian(rawData[3]);;
+
+//		cout << "magick number " << magicNumber << endl;
+//		cout << "number of images " << imageCount << endl;
+//		cout << "dimensions: " << rows << "x" << columns << endl;
+
+//		file.read((char * ) &rawData[i * fileLength], fileLength);
+
+		ValueMapVector maps;
+		maps.resize(imageCount);
+
+		vector<unsigned char> rawPixels(rows * columns);
+
+		for (auto &map: maps) {
+			map.resize(rows, columns);
+			file.read((char *) &rawPixels[0], rows * columns);
+			map.setData(rawPixels);
+		}
+
+		return maps;
+	};
+
+	auto loadLabels = [] (string filename) {
+//	[offset] [type]          [value]          [description]
+//	0000     32 bit integer  0x00000801(2049) magic number (MSB first)
+//	0004     32 bit integer  60000            number of items
+//	0008     unsigned byte   ??               label
+//	0009     unsigned byte   ??               label
+//	........
+//	xxxx     unsigned byte   ??               label
+//	The labels values are 0 to 9.
+
+
+		ifstream file(filename);
+		uint32_t rawData[4];
+
+		file.read((char*)rawData, sizeof (uint32_t) * 2);
+
+		uint32_t magicNumber = correctMNISTEndian(rawData[0]);
+		uint32_t imageCount = correctMNISTEndian(rawData[1]);
+
+		cout << "magick number " << magicNumber << endl;
+		cout << "number of images " << imageCount << endl;
+
+		vector<unsigned char> rawLabels(imageCount);
+
+		file.read((char *) &rawLabels[0], imageCount);
+
+		LabelVector labels(rawLabels.begin(), rawLabels.end());
+
+		return labels;
+	};
+
+	data.xtr = loadImages(filename + "/" + "train-images.idx3-ubyte");
+	data.ytr = loadLabels(filename + "/" + "train-labels.idx1-ubyte");
+
+	data.xte = loadImages(filename + "/" + "t10k-images.idx3-ubyte");
+	data.yte = loadLabels(filename + "/" + "t10k-labels.idx1-ubyte");
+
+	return data;
+}
+
+

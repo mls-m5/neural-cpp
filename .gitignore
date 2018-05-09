@@ -11,6 +11,21 @@ CImg.h
 common.dep
 
 trainingsets/cifar-10-batches-bin/
+
+mnist1
+mod2svm
+neural_main
+trainingsets/mnist/t10k-images-idx3-ubyte.gz
+trainingsets/mnist/t10k-images.idx3-ubyte
+trainingsets/mnist/t10k-labels-idx1-ubyte.gz
+trainingsets/mnist/t10k-labels.idx1-ubyte
+trainingsets/mnist/train-images-idx3-ubyte.gz
+trainingsets/mnist/train-images.idx3-ubyte
+trainingsets/mnist/train-labels-idx1-ubyte.gz
+trainingsets/mnist/train-labels.idx1-ubyte
+
+.vscode/
+
 snapshot.txt
 
 mod1nn

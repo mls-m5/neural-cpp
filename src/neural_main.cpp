@@ -11,7 +11,8 @@ int main(int, char **) {
 	ValueMap inputMap(loadValueMapImg("trainingsets/linus.png", 100, 100));
 	ValueMap falseInputMap(loadValueMapImg("trainingsets/house.png", 100, 100));
 
-	inputMap.normalze();
+//	inputMap.normalze();
+	input.prepare();
 
 	ValueMap catOutputMap(2, 1, 1, {1, 0}); //A cat
 	TrainingSet set1(inputMap, catOutputMap);
