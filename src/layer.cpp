@@ -220,7 +220,7 @@ TrainingData loadMNISTBinary(std::string filename) {
 
 		file.read((char*)rawData, sizeof (uint32_t) * 4);
 
-		uint32_t magicNumber = correctMNISTEndian(rawData[0]);
+//		uint32_t magicNumber = correctMNISTEndian(rawData[0]);
 		uint32_t imageCount = correctMNISTEndian(rawData[1]);
 		uint32_t rows = correctMNISTEndian(rawData[2]);;
 		uint32_t columns = correctMNISTEndian(rawData[3]);;
@@ -261,11 +261,11 @@ TrainingData loadMNISTBinary(std::string filename) {
 
 		file.read((char*)rawData, sizeof (uint32_t) * 2);
 
-		uint32_t magicNumber = correctMNISTEndian(rawData[0]);
+//		uint32_t magicNumber = correctMNISTEndian(rawData[0]);
 		uint32_t imageCount = correctMNISTEndian(rawData[1]);
 
-		cout << "magick number " << magicNumber << endl;
-		cout << "number of images " << imageCount << endl;
+//		cout << "magick number " << magicNumber << endl;
+//		cout << "number of images " << imageCount << endl;
 
 		vector<unsigned char> rawLabels(imageCount);
 
