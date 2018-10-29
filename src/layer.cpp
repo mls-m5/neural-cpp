@@ -218,6 +218,10 @@ TrainingData loadMNISTBinary(std::string filename) {
 		ifstream file(filename);
 		uint32_t rawData[4];
 
+		if (!file.is_open()) {
+			throw filename + " is not open";
+		}
+
 		file.read((char*)rawData, sizeof (uint32_t) * 4);
 
 //		uint32_t magicNumber = correctMNISTEndian(rawData[0]);

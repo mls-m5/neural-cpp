@@ -7,6 +7,10 @@ CImg.h
 *.project
 *.cproject
 *~
+*-test
+*-app
+*.d
+*.depend
 
 common.dep
 

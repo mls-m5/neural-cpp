@@ -20,7 +20,7 @@ using namespace std;
 int main() {
 	cout << "Starting mnist test" << endl;
 
-	auto minstData = loadMNISTBinary("trainingsets/mnist");
+	auto minstData = loadMNISTBinary("../trainingsets/mnist");
 
 	showMap(minstData.xtr[0], "test");
 
@@ -35,9 +35,6 @@ int main() {
 		output[minstData.ytr[i]] = 1;
 		sets.push_back({minstData.xtr[i], output});
 	}
-
-
-
 
 	Network network(new PatternTrainer(sets));
 //	Network network(new LinearTrainer(sets));
