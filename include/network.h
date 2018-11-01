@@ -9,6 +9,8 @@
 
 #include "valuemap.h"
 #include "layer.h"
+#include "trainingset.h"
+#include "trainer.h"
 
 #include <exception>
 #include <memory>
@@ -21,123 +23,6 @@
 //4: Backpropagate error
 //5: Ändra vikter och bias
 
-class TrainingSet {
-public:
-	template<class T>
-	TrainingSet(std::vector<T> in, std::vector<T> out):
-	input(in.size(), 1),
-	output(out.size(), 1){
-		for (size_t i = 0; i < in.size(); ++i) {
-			input[i] = in[i];
-		}
-		for (size_t i = 0; i < out.size(); ++i) {
-			output[i] = out[i];
-		}
-    };
-	template<class T>
-	TrainingSet(std::vector<std::vector<T>> set):
-	TrainingSet(set[0], set[1])
-	{}
-
-	TrainingSet(const TrainingSet& set) {
-		input = set.input;
-		output = set.output;
-	}
-	TrainingSet() = default;
-
-	TrainingSet(const ValueMap &in, const ValueMap &out):
-	input(in), output(out){
-	}
-	ValueMap input;
-	ValueMap output;
-};
-
-
-class Trainer {
-public:
-	virtual ~Trainer() {}
-
-	virtual void rotate() = 0;
-
-	virtual TrainingSet &getCurrent() = 0;
-};
-
-class LinearTrainer: public Trainer {
-public:
-	std::vector<TrainingSet> _sets;
-	size_t _current = 0;
-
-	LinearTrainer(std::vector<TrainingSet> trainingSets) {
-		_sets = trainingSets;
-	}
-
-	LinearTrainer() = default;
-	LinearTrainer(const LinearTrainer &) = default;
-	LinearTrainer(LinearTrainer &&) = default;
-
-	void rotate() override {
-		if (++_current >= _sets.size()) {
-			_current = 0;
-		}
-	}
-
-	TrainingSet &getCurrent() override {
-		return _sets[_current];
-	}
-
-	void add(TrainingSet set) {
-		_sets.push_back(std::move(set));
-	}
-};
-
-//Order the training sets after which output that is the strongest
-//Good for pattern recognition training
-class PatternTrainer: public Trainer {
-protected:
-	std::map<int, LinearTrainer> _subTrainers;
-	size_t _current = 0;
-public:
-
-
-	PatternTrainer(std::vector<TrainingSet> trainingSets) {
-		for (auto &it: trainingSets) {
-			add(it);
-		}
-	}
-
-	PatternTrainer() = default;
-	PatternTrainer(const PatternTrainer &) = default;
-	PatternTrainer(PatternTrainer &&) = default;
-
-	void rotate() override {
-		if (++_current >= _subTrainers.size()) {
-			_current = 0;
-		}
-		_subTrainers[_current].rotate();
-	}
-
-	TrainingSet &getCurrent() override {
-		return _subTrainers[_current].getCurrent();
-	}
-
-
-	void add(TrainingSet set) {
-		if (set.output.height() != 1 || set.output.depth() != 1) {
-			throw std::range_error("Trainingset height and depth must be 1 for PatternTrainer");
-		}
-
-		ValueType max = -10000000;
-		int maxNumber = -1;
-		for (auto i = 0; i < set.output.width(); ++i) {
-			if (set.output(i) > max) {
-				max = set.output(i);
-				maxNumber = i;
-			}
-		}
-		_subTrainers[maxNumber].add(set);
-	}
-
-};
 
 
 class Network {
@@ -156,11 +41,17 @@ public:
 		ValueMap inMap(set.input.width(), set.input.height(), set.input.depth());
 		layers.push_back(new InputLayer(inMap));
 	}
-	Network(Trainer *trainer):
+
+	Network(Trainer *trainer, int w = 0, int h = 0, int d = 0):
 		trainer(trainer) {
-		auto &set = this->trainer->getCurrent();
-		ValueMap inMap(set.input.width(), set.input.height(), set.input.depth());
-		layers.push_back(new InputLayer(inMap));
+		if (w == 0 && h == 0 && d == 0) {
+			layers.push_back(new InputLayer(w, h, d));
+		}
+		else {
+			auto &set = this->trainer->getCurrent();
+			ValueMap inMap(set.input.width(), set.input.height(), set.input.depth());
+			layers.push_back(new InputLayer(inMap));
+		}
 	}
 
 	~Network() {

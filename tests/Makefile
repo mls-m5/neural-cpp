@@ -2,7 +2,7 @@ CORE_OBJECTS=${wildcard ../src/*.o}
 TEST_CPP_FILES=${wildcard *-test.cpp}
 TESTS=${TEST_CPP_FILES:.cpp=}
 DEP=${TEST_CPP_FILES:.cpp=.d}
-CXXFLAGS=-I../include
+CXXFLAGS=-I../include -g
 
 
 all: .depend ${TESTS}

@@ -60,6 +60,7 @@ public:
 	{
 		_data = m.data();
 	}
+
 	GenericValueMap(dim_t w = 1, dim_t h = 1, dim_t d = 1, dim_t c = 1):
 		_width(w),
 		_height(h),

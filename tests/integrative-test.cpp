@@ -322,6 +322,9 @@ TEST_CASE("valuemap reshape test") {
 	for (size_t i = 0; i < map1.size(); ++i) {
 		ASSERT_EQ(map1[i], map2[i]);
 	}
+}
+
+TEST_CASE("linear trainer") {
 
 }
 

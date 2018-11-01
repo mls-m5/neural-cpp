@@ -64,11 +64,11 @@ public:
 	//Call for hidden and output layers
 	virtual void correctErrors(ValueType learningRate) = 0;
 
-	static ValueType activationFunction(ValueType value) {
+	static inline ValueType activationFunction(ValueType value) {
 		return 1. / (1. + exp(-value)); //Todo: optimize for performance
 	}
 
-	static ValueType activationDerivate(ValueType value) {
+	static inline ValueType activationDerivate(ValueType value) {
 		auto a = activationFunction(value);
 	    return a * (1.-a);
 	}
@@ -90,6 +90,13 @@ public:
 	{
 		type = "input";
 		a = activations;
+	}
+
+
+	InputLayer(dim_t w, dim_t h, dim_t d):
+		Layer(w, h, d)
+	{
+		type = "input";
 	}
 
 	//input layers does not do anything
