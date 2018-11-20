@@ -324,8 +324,15 @@ TEST_CASE("valuemap reshape test") {
 	}
 }
 
-TEST_CASE("linear trainer") {
 
+TEST_CASE("max pool") {
+	ValueMap map1(2, 2, 1, {1, 2, 3, 4});
+	InputLayer input(map1);
+	MaxPool pool(input);
+	pool.forward();
+
+	ASSERT_EQ(pool.fromIndex(0, 0), 3);
+	ASSERT_EQ(pool.a(0 , 0), 4);
 }
 
 

@@ -64,15 +64,34 @@ public:
 	//Call for hidden and output layers
 	virtual void correctErrors(ValueType learningRate) = 0;
 
-	static inline ValueType activationFunction(ValueType value) {
+	static inline ValueType sigmoidFunction(ValueType value) {
 		return 1. / (1. + exp(-value)); //Todo: optimize for performance
 	}
 
-	static inline ValueType activationDerivate(ValueType value) {
-		auto a = activationFunction(value);
+	//calculate the activation fuction on a whole value map
+	static void activationFunction(const ValueMap &input, ValueMap &output) {
+		//Todo: make different functions for eg ReLu or sigmoid etc
+		//switch type...
+		mn_for1(input.size(), i) {
+			output[i] = sigmoidFunction(input[i]);
+		}
+	}
+
+	static void activationFunction(const ValueMap &input, ValueMap &output, ValueMap &derivate) {
+		activationFunction(input, output);
+		activationDerivate(input, derivate); //This can be optimized for example for sigmoid functions
+	}
+
+	static inline ValueType sigmoidDerivate(ValueType value) {
+		auto a = sigmoidFunction(value);
 	    return a * (1.-a);
 	}
 
+	static void activationDerivate(const ValueMap &input, ValueMap &output) {
+		mn_for1(input.size(), i) {
+			output[i] = sigmoidDerivate(input[i]);
+		}
+	}
 };
 
 
@@ -165,11 +184,13 @@ public:
 			net (x, y, z) = n;
 		}
 
-		mn_forXYZ(a, x, y, z) {
-			auto n = net(x, y, z);
-			a(x, y, z) = activationFunction(n); // Add activation function
-			aPrim(x, y, z) = activationDerivate(n); //Calculate derivative, this can be optimized
-		}
+//		mn_forXYZ(a, x, y, z) {
+//			auto n = net(x, y, z);
+//			a(x, y, z) = sigmoidFunction(n); // Add activation function
+//			aPrim(x, y, z) = sigmoidDerivate(n); //Calculate derivative, this can be optimized
+//		}
+
+		activationFunction(net, a, aPrim);
 	}
 
 	void prepareBackward() override {
@@ -240,7 +261,7 @@ public:
 
 	//Simpler initialization
 	MaxPool(Layer& input):
-	MaxPool(.5 * input.a.width(), .5 * input.a.height(), input.a.depth()){
+	MaxPool(input.a.width() / 2, input.a.height() / 2, input.a.depth()){
 		setSource(input);
 		cout << "w " << input.a.width();
 	}
@@ -348,9 +369,11 @@ public:
 			}
 
 			net(ox) = n;
-			a(ox) = activationFunction(n);
-			aPrim(ox) = activationDerivate(n);
+//			a(ox) = sigmoidFunction(n);
+//			aPrim(ox) = sigmoidDerivate(n);
 		}
+
+		activationFunction(net, a, aPrim);
 	}
 
 	void prepareBackward() override {
