@@ -54,8 +54,8 @@ TEST_CASE("full layer simple backpropagation test") {
 		}
 
 		Network network(sets);
-		auto hiddenLayer = new FullLayer(network.back(), 3);
-		auto outLayer = new FullLayer(*hiddenLayer, 1);
+		auto hiddenLayer = new FullLayer(network.back(), 3, Layer::Sigmoid);
+		auto outLayer = new FullLayer(*hiddenLayer, 1, Layer::Sigmoid);
 		network.setChain(outLayer);
 
 		network.forwardPropagate();
@@ -322,6 +322,22 @@ TEST_CASE("valuemap reshape test") {
 	for (size_t i = 0; i < map1.size(); ++i) {
 		ASSERT_EQ(map1[i], map2[i]);
 	}
+}
+
+
+TEST_CASE("Relu function") {
+	InputLayer input(2, 1, 1);
+	input.a[0] = .5;
+	input.a[1] = -.5;
+	FullLayer full(input, 2);
+	full.kernel.setData(vector<ValueType>({1, 0, 0, 1}));
+	full.activationFunctionType(full.Relu);
+	full.forward();
+
+	ASSERT_EQ(full.a[0], .5);
+	ASSERT_EQ(full.a[1], 0);
+	ASSERT_EQ(full.aPrim[0], 1);
+	ASSERT_EQ(full.aPrim[1], 0);
 }
 
 

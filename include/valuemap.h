@@ -84,7 +84,7 @@ public:
 	}
 
 	template <class U>
-	void setData (std::vector<U> &data) {
+	void setData (const std::vector<U> &data) {
 		if (data.size() > _data.size()) {
 			throw std::out_of_range("trying to assign to large data to valuemap");
 		}

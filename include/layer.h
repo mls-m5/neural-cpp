@@ -18,19 +18,27 @@ using ::exp;
 
 class Layer {
 public:
+	enum ActivationFunction {
+		Relu,
+		Sigmoid,
+		Softmax,
+	};
+
 	Layer *source = 0;
 	Layer *target = 0;
 	ValueMap a;
 	ValueMap aPrim;
 	ValueMap d;
+	ActivationFunction _activationFunctionType = Sigmoid;
 
 	std::string name = ""; //Used to identify the layer
 	std::string type = "none"; //Name that is used for saving
 
-	Layer(int width, int height, int depth = 1):
+	Layer(int width, int height, int depth = 1, ActivationFunction f = Sigmoid):
 	a(width, height, depth),
 	aPrim(width, height, depth),
-	d(width, height, depth){
+	d(width, height, depth),
+	_activationFunctionType(f){
 	}
 
 	Layer() = default;
@@ -40,6 +48,8 @@ public:
 		aPrim.resize(width, height, depth, spectrum);
 		d.resize(width, height, depth, spectrum);
 	}
+
+
 
 	virtual ~Layer() {
 
@@ -64,33 +74,75 @@ public:
 	//Call for hidden and output layers
 	virtual void correctErrors(ValueType learningRate) = 0;
 
-	static inline ValueType sigmoidFunction(ValueType value) {
-		return 1. / (1. + exp(-value)); //Todo: optimize for performance
+	ActivationFunction activationFunctionType() {
+		return _activationFunctionType;
+	}
+
+	void activationFunctionType(ActivationFunction f) {
+		_activationFunctionType = f;
 	}
 
 	//calculate the activation fuction on a whole value map
-	static void activationFunction(const ValueMap &input, ValueMap &output) {
-		//Todo: make different functions for eg ReLu or sigmoid etc
-		//switch type...
-		mn_for1(input.size(), i) {
-			output[i] = sigmoidFunction(input[i]);
+	static void activationFunction(ActivationFunction type, const ValueMap &input, ValueMap &output) {
+		switch (type) {
+		case Sigmoid:
+			mn_for1(input.size(), i) {
+				output[i] = sigmoidFunction(input[i]);
+			}
+			break;
+		case Relu:
+			mn_for1(input.size(), i) {
+				output[i] = ReluFunction(input[i]);
+			}
+			break;
+		case Softmax:
+			//Todo: implement this
+			break;
 		}
 	}
 
-	static void activationFunction(const ValueMap &input, ValueMap &output, ValueMap &derivate) {
-		activationFunction(input, output);
-		activationDerivate(input, derivate); //This can be optimized for example for sigmoid functions
+	static void activationFunction(
+			ActivationFunction type, const ValueMap &input, ValueMap &output, ValueMap &derivate) {
+		activationFunction(type, input, output);
+		activationDerivate(type, input, output, derivate); //This can be optimized for example for sigmoid functions
 	}
 
-	static inline ValueType sigmoidDerivate(ValueType value) {
-		auto a = sigmoidFunction(value);
-	    return a * (1.-a);
-	}
+	static void activationDerivate(
+			ActivationFunction type, const ValueMap &input, const ValueMap &computedValue, ValueMap &derivativeOut) {
+		switch (type) {
+		case Sigmoid:
+			mn_for1(input.size(), i) {
+				derivativeOut[i] = sigmoidDerivate(computedValue[i]);
+			}
+			break;
+		case Relu:
+			mn_for1(input.size(), i) {
+				derivativeOut[i] = ReluDerivative(input[i]);
+			}
+			break;
+		case Softmax:
 
-	static void activationDerivate(const ValueMap &input, ValueMap &output) {
-		mn_for1(input.size(), i) {
-			output[i] = sigmoidDerivate(input[i]);
+			break;
 		}
+	}
+
+	static inline ValueType ReluFunction(ValueType in) {
+		return in * (in > 0);
+	}
+
+	static inline ValueType ReluDerivative(ValueType in) {
+		return in > 0;
+	}
+
+	static inline ValueType sigmoidFunction(ValueType value) {
+		return 1. / (1. + exp(-value));
+	}
+
+	//Note that this function as input takes the output of a sigmoidFunction
+	static inline ValueType sigmoidDerivate(ValueType computedValue) {
+//		auto a = sigmoidFunction(value); //Like this
+//	    return a * (1.-a);
+		return computedValue * (1. - computedValue);
 	}
 };
 
@@ -123,6 +175,7 @@ public:
 	virtual void prepareBackward() override {};
 	virtual void backward() override {};
 	virtual void correctErrors(ValueType learningRate) override {
+#pragma warning("check if this really should correct errors in a")
 		mn_forXYZ(a, x, y, z) {
 			a(x, y, z) -= d(x, y, z) * learningRate;
 		}
@@ -190,7 +243,7 @@ public:
 //			aPrim(x, y, z) = sigmoidDerivate(n); //Calculate derivative, this can be optimized
 //		}
 
-		activationFunction(net, a, aPrim);
+		activationFunction(activationFunctionType(), net, a, aPrim);
 	}
 
 	void prepareBackward() override {
@@ -329,8 +382,8 @@ public:
 	ValueMap bias;
 	ValueMap net;
 
-	FullLayer(Layer &layer, int number):
-	Layer(number, 1, 1),
+	FullLayer(Layer &layer, int number, ActivationFunction activationFunctionType = Sigmoid):
+	Layer(number, 1, 1, activationFunctionType),
 	number(number),
 	kernel(layer.a.width(), layer.a.height(), layer.a.depth(), number),
 	bias(number, 1),
@@ -373,7 +426,7 @@ public:
 //			aPrim(ox) = sigmoidDerivate(n);
 		}
 
-		activationFunction(net, a, aPrim);
+		activationFunction(activationFunctionType(), net, a, aPrim);
 	}
 
 	void prepareBackward() override {
