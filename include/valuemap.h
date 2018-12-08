@@ -21,7 +21,7 @@ typedef int dim_t;
 
 
 
-#define mn_for1(bound,i) for (int i = 0; i<(int)(bound); ++i)
+#define mn_for1(size,i) for (int i = 0; i<(int)(size); ++i)
 #define mn_forX(img,x) mn_for1((img)._width,x)
 #define mn_forY(img,y) mn_for1((img)._height,y)
 #define mn_forZ(img,z) mn_for1((img)._depth,z)

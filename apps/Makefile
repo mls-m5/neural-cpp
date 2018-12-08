@@ -4,7 +4,7 @@ APPS_CPP_FILES=${wildcard *.cpp}
 APPS_OBJECTS=${APPS_CPP_FILES:.cpp=.o}
 APPS=${APPS_CPP_FILES:.cpp=-app}
 DEP=${APPS_CPP_FILES:.cpp=.d}
-CXXFLAGS+= -I../include -I../matgui/include/matgui
+CXXFLAGS+= -I../include -I../matgui/include/matgui -g
 
 
 all: .depend ${APPS}

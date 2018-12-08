@@ -15,6 +15,7 @@
 #include "texture.h"
 #include "layer.h"
 #include "network.h"
+#include "imageview.h"
 using namespace std;
 
 //LIBS= ../matgui/matgui-sdl.a -lGL -lSDL2 -lSDL2_image -pthread
@@ -48,16 +49,17 @@ int getMaxIndex(const ValueMap &map) {
 
 ofstream logFile("visual-app-logg.csv");
 
-class ImageView: public LinearLayout {
+class TrainingView: public LinearLayout {
 public:
 	Paint color;
-	Texture texture;
+	ImageView *textureView, *internalView, *outputView;
 	TrainingData data = loadMNISTBinary("../trainingsets/mnist");
 	vector<TrainingSet> sets = convertToTrainingSets(data.xtr, data.ytr);
 	Network network;
+	FullLayer *fullLayer1 = nullptr;
 	int generation = 0;
 
-	ImageView():
+	TrainingView():
 		network(sets)
 	{
 		setupNetwork();
@@ -65,30 +67,40 @@ public:
 		color.line.color(1, 1,1);
 
 		logFile << "generation, percentage" << endl;
+
+		addChild(textureView = new ImageView);
+		textureView->weight(4);
+		addChild(internalView = new ImageView);
+		addChild(outputView = new ImageView);
 	}
 
 	void setupNetwork() {
 		auto layer1 = new FullLayer(network.back(), 40);
+		this->fullLayer1 = layer1;
 		auto output = new FullLayer(*layer1, 10);
 		network.setChain(output);
 
 		network.forwardPropagate();
 	}
 
-	void createTexture(const ValueMap map) {
-		auto tr = map;
-		std::vector<Texture::Pixel> charValueMap(tr.size());
+	void createTexture(ValueMap map) {
+		map /= map.max();
 
-		mn_for1(tr.size(), i) {
-			charValueMap[i].r = tr[i];
-			charValueMap[i].g = tr[i];
-			charValueMap[i].b = tr[i];
-		}
+		textureView->texture().createGrayscale(map.data(), map.width(), map.height());
+		textureView->texture().setInterpolation(Texture::Nearest);
 
-		texture.createBitmap(charValueMap, tr.width(), tr.height());
+		auto a = fullLayer1->a;
+		a /= a.max();
+		internalView->texture().createGrayscale(a.data(), a.size(), 1);
+		internalView->texture().setInterpolation(Texture::Nearest);
+
+		auto outA = network.back().a.data();
+		outputView->texture().createGrayscale(outA, outA.size());
+		outputView->texture().setInterpolation(Texture::Nearest);
 	}
 
-	void draw() {
+	void draw() override {
+		LinearLayout::draw();
 		static int pictureNum = -1;
 		static float t = 2;
 		static float right = 0;
@@ -134,7 +146,9 @@ public:
 			++generation;
 		}
 
-		drawTextureRect(0, 0, 0, _width, _height, texture, DrawStyle::OrigoTopLeft);
+//		drawTextureRect(0, 0, 0, _width, _height, texture, DrawStyle::OrigoTopLeft);
+//		drawTextureRect(0, 0, 0, _width, _height * 0 + 10, internalTexture, DrawStyle::OrigoTopLeft);
+//		drawTextureRect(0, 10, 0, _width, _height * 0 + 10, outputTexture, DrawStyle::OrigoTopLeft);
 	}
 };
 
@@ -144,7 +158,7 @@ int main(int argc, char **argv) {
 	Window window("hej", 400, 400);
 	window.currentStyle.line.color(1,1,1);
 
-	auto image = new ImageView;
+	auto image = new TrainingView;
 
 	window.addChild(image);
 
