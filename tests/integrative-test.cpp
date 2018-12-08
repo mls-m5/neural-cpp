@@ -329,9 +329,8 @@ TEST_CASE("Relu function") {
 	InputLayer input(2, 1, 1);
 	input.a[0] = .5;
 	input.a[1] = -.5;
-	FullLayer full(input, 2);
+	FullLayer full(input, 2, Layer::Relu);
 	full.kernel.setData(vector<ValueType>({1, 0, 0, 1}));
-	full.activationFunctionType(full.Relu);
 	full.forward();
 
 	ASSERT_EQ(full.a[0], .5);
