@@ -9,6 +9,7 @@
 
 #include "unittest.h"
 #include "network.h"
+#include "alllayers.h"
 
 #include <iostream>
 #include <memory>
@@ -24,7 +25,7 @@ TEST_CASE("full layer test") {
 		map(0) = 1;
 		map(1) = 1;
 		InputLayer inputLayer(map);
-		FullLayer layer(inputLayer, 1);
+		DenseLayer layer(inputLayer, 1);
 		layer.kernel.fill(1);
 		layer.bias.fill(0);
 
@@ -54,8 +55,8 @@ TEST_CASE("full layer simple backpropagation test") {
 		}
 
 		Network network(sets);
-		auto hiddenLayer = new FullLayer(network.back(), 3, Layer::Sigmoid);
-		auto outLayer = new FullLayer(*hiddenLayer, 1, Layer::Sigmoid);
+		auto hiddenLayer = new DenseLayer(network.back(), 3, Layer::Sigmoid);
+		auto outLayer = new DenseLayer(*hiddenLayer, 1, Layer::Sigmoid);
 		network.setChain(outLayer);
 
 		network.forwardPropagate();
@@ -93,7 +94,7 @@ TEST_CASE("full layer simple backpropagation test") {
 		}
 
 		Network network(sets);
-		auto outLayer = new FullLayer(network.back(), 2);
+		auto outLayer = new DenseLayer(network.back(), 2);
 		network.pushLayer(outLayer);
 
 		network.forwardPropagate();
@@ -124,7 +125,7 @@ TEST_CASE("save test") {
 	ValueMap inputMap(4, 4, 1, 3);
 	InputLayer input(inputMap);
 	ConvolutionLayer c(input, 2, 3);
-	FullLayer f(c, 5);
+	DenseLayer f(c, 5);
 
 	c.kernel.noise(1);
 	c.bias.noise(1);
@@ -145,7 +146,7 @@ TEST_CASE("save test") {
 
 
 	std::unique_ptr<Layer> f2ptr(Layer::load(ss, *c2));
-	auto f2 = dynamic_cast<FullLayer*> (f2ptr.get());
+	auto f2 = dynamic_cast<DenseLayer*> (f2ptr.get());
 
 
 	ASSERT(f2, "no layer or wrong type");
@@ -160,7 +161,7 @@ TEST_CASE("dream test") {
 
 	Network network({{input, output}});
 
-	network.pushLayer(new FullLayer(network.back(), 3));
+	network.pushLayer(new DenseLayer(network.back(), 3));
 
 	auto errorBefore = network.getTotalCost();
 	cout << "Error before: " << errorBefore << endl;
@@ -200,9 +201,9 @@ TEST_CASE("full layer four neuron bp test") {
 		}
 
 		Network network(sets);
-		auto hiddenLayer = new FullLayer(network.back(), 3);
+		auto hiddenLayer = new DenseLayer(network.back(), 3);
 		network.pushLayer(hiddenLayer);
-		auto outLayer = new FullLayer(*hiddenLayer, 2);
+		auto outLayer = new DenseLayer(*hiddenLayer, 2);
 		network.pushLayer(outLayer);
 
 		network.forwardPropagate();
@@ -329,7 +330,7 @@ TEST_CASE("Relu function") {
 	InputLayer input(2, 1, 1);
 	input.a[0] = .5;
 	input.a[1] = -.5;
-	FullLayer full(input, 2, Layer::Relu);
+	DenseLayer full(input, 2, Layer::Relu);
 	full.kernel.setData(vector<ValueType>({1, 0, 0, 1}));
 	full.forward();
 

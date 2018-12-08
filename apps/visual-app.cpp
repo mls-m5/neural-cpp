@@ -13,9 +13,10 @@
 #include "button.h"
 #include "draw.h"
 #include "texture.h"
-#include "layer.h"
+#include "alllayers.h"
 #include "network.h"
 #include "imageview.h"
+#include "label.h"
 using namespace std;
 
 //LIBS= ../matgui/matgui-sdl.a -lGL -lSDL2 -lSDL2_image -pthread
@@ -54,9 +55,10 @@ public:
 	Paint color;
 	ImageView *textureView, *internalView, *outputView;
 	TrainingData data = loadMNISTBinary("../trainingsets/mnist");
+	Label *resultLabel;
 	vector<TrainingSet> sets = convertToTrainingSets(data.xtr, data.ytr);
 	Network network;
-	FullLayer *fullLayer1 = nullptr;
+	DenseLayer *fullLayer1 = nullptr;
 	int generation = 0;
 
 	TrainingView():
@@ -70,20 +72,22 @@ public:
 
 		addChild(textureView = new ImageView);
 		textureView->weight(4);
+		addChild(resultLabel = new Label("result here"));
 		addChild(internalView = new ImageView);
 		addChild(outputView = new ImageView);
 	}
 
 	void setupNetwork() {
-		auto layer1 = new FullLayer(network.back(), 40);
+		auto layer1 = new DenseLayer(network.back(), 40);
 		this->fullLayer1 = layer1;
-		auto output = new FullLayer(*layer1, 10);
+		auto output = new DenseLayer(*layer1, 10);
 		network.setChain(output);
 
 		network.forwardPropagate();
 	}
 
-	void createTexture(ValueMap map) {
+	void createTexture() {
+		auto map = network.layers.front()->a;
 		map /= map.max();
 
 		textureView->texture().createGrayscale(map.data(), map.width(), map.height());
@@ -101,17 +105,10 @@ public:
 
 	void draw() override {
 		LinearLayout::draw();
-		static int pictureNum = -1;
 		static float t = 2;
 		static float right = 0;
 		static float wrong = 0;
-
-		t += .1;
-		if (t > 1) {
-			t = 0;
-			++pictureNum;
-			createTexture(data.xtr[pictureNum]);
-		}
+		int guessedIndex = 0;
 
 
 		for (int i = 0; i < 100; ++i) {
@@ -122,6 +119,7 @@ public:
 			//		cout << output << endl;
 			int maxIndex = getMaxIndex(output);
 			auto trueAnswer = getMaxIndex(network.getCurrentTrainingSet().output);
+			guessedIndex = maxIndex;
 			cout << "guess: " <<  maxIndex << "\t true:" << trueAnswer << endl;
 			cout << "hit? " << (maxIndex == trueAnswer) << endl;
 
@@ -146,9 +144,12 @@ public:
 			++generation;
 		}
 
-//		drawTextureRect(0, 0, 0, _width, _height, texture, DrawStyle::OrigoTopLeft);
-//		drawTextureRect(0, 0, 0, _width, _height * 0 + 10, internalTexture, DrawStyle::OrigoTopLeft);
-//		drawTextureRect(0, 10, 0, _width, _height * 0 + 10, outputTexture, DrawStyle::OrigoTopLeft);
+		t += .1;
+		if (t > .5) {
+			t = 0;
+			createTexture();
+			resultLabel->label(to_string(guessedIndex));
+		}
 	}
 };
 

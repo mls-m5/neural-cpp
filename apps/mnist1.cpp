@@ -11,6 +11,7 @@
 
 #include "valuemap.h"
 #include "network.h"
+#include "alllayers.h"
 #include "gui.h"
 #include <fstream>
 
@@ -47,8 +48,8 @@ int main() {
 	layer2->name = "conv layer 2";
 	auto pool2 = new MaxPool(*layer2);
 //	auto pool3 = new MaxPool(*pool2);
-	auto std1 = new FullLayer(*pool2, 10);
-	auto full2 = new FullLayer(*std1, 10);
+	auto std1 = new DenseLayer(*pool2, 10);
+	auto full2 = new DenseLayer(*std1, 10);
 
 	network.setChain(full2);
 

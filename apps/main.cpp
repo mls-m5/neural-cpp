@@ -6,6 +6,7 @@
 #include <vector>
 #include "gui.h"
 #include "network.h"
+#include "alllayers.h"
 
 using namespace std;
 
@@ -34,8 +35,8 @@ void test1() {
 	layer2->name = "conv layer 2";
 	auto pool2 = new MaxPool(*layer2);
 	auto pool3 = new MaxPool(*pool2);
-	auto std1 = new FullLayer(*pool3, 10);
-	auto full2 = new FullLayer(*std1, 2);
+	auto std1 = new DenseLayer(*pool3, 10);
+	auto full2 = new DenseLayer(*std1, 2);
 
 	network.setChain(full2);
 
@@ -73,9 +74,9 @@ void test2() {
 	}
 
 	Network network(sets);
-	auto hiddenLayer = new FullLayer(network.back(), 3);
+	auto hiddenLayer = new DenseLayer(network.back(), 3);
 	network.pushLayer(hiddenLayer);
-	auto outLayer = new FullLayer(*hiddenLayer, 2);
+	auto outLayer = new DenseLayer(*hiddenLayer, 2);
 	network.pushLayer(outLayer);
 
 

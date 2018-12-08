@@ -8,6 +8,7 @@
 
 #include "CImg.h"
 #include "layer.h"
+#include "alllayers.h"
 #include <fstream>
 #include <iostream>
 #include <functional>
@@ -16,6 +17,26 @@
 
 using namespace cimg_library;
 using namespace std;
+
+
+
+Layer* Layer::load(std::istream& stream, Layer &from) {
+	std::string type, name;
+	stream >> type >> name;
+
+	if (type == "conv") {
+		return new ConvolutionLayer(stream, from);
+	}
+	if (type == "maxpool") {
+		return new MaxPool(from); //Note the max-pool does not load any data
+	}
+	if (type == "dense") {
+		return new DenseLayer(stream, from);
+	}
+	else {
+		return nullptr;
+	}
+}
 
 ValueMap loadValueMapImg(std::string filename, int nx, int ny) {
 	CImg<float> image(filename.c_str());
