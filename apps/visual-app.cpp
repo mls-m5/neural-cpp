@@ -91,16 +91,16 @@ public:
 		map /= map.max();
 
 		textureView->texture().createGrayscale(map.data(), map.width(), map.height());
-		textureView->texture().setInterpolation(Texture::Nearest);
+		textureView->texture().interpolation(Texture::Nearest);
 
 		auto a = fullLayer1->a;
 		a /= a.max();
 		internalView->texture().createGrayscale(a.data(), a.size(), 1);
-		internalView->texture().setInterpolation(Texture::Nearest);
+		internalView->texture().interpolation(Texture::Nearest);
 
 		auto outA = network.back().a.data();
 		outputView->texture().createGrayscale(outA, outA.size());
-		outputView->texture().setInterpolation(Texture::Nearest);
+		outputView->texture().interpolation(Texture::Nearest);
 	}
 
 	void draw() override {
